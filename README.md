@@ -1,2 +1,425 @@
-# GLITCH-WIN
-GLITCH WIN
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GLITCH WIN - ULTIMATE PRO</title>
+
+    <style>
+        :root {
+            --primary: #00ff88;
+            --secondary: #00d2ff;
+            --accent: #ff00ff;
+            --danger: #ff4444;
+            --bg: #07090c;
+            --card-bg: rgba(21, 25, 30, 0.7);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+        body { background: var(--bg); color: white; display: flex; min-height: 100vh; overflow: hidden; }
+        *::-webkit-scrollbar { display: none; }
+
+        nav { width: 280px; background: rgba(15, 18, 22, 0.95); padding: 30px; border-right: 1px solid rgba(255,255,255,0.05); position: fixed; height: 100vh; display: flex; flex-direction: column; z-index: 100; backdrop-filter: blur(10px); }
+        .logo { font-size: 32px; font-weight: 900; margin-bottom: 40px; background: linear-gradient(45deg, var(--primary), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        
+        .nav-item { padding: 16px 20px; margin-bottom: 10px; border-radius: 18px; cursor: pointer; color: #8a8f98; transition: 0.3s; font-weight: 600; display: flex; align-items: center; gap: 12px; }
+        .nav-item.active { background: linear-gradient(90deg, rgba(0,255,136,0.1), transparent); color: var(--primary); border-left: 4px solid var(--primary); }
+
+        main { margin-left: 280px; flex: 1; height: 100vh; overflow-y: auto; padding: 40px; display: flex; flex-direction: column; align-items: center; }
+        .page { display: none; width: 100%; max-width: 1000px; flex-direction: column; animation: fadeIn 0.5s ease; }
+        .page.active { display: flex; }
+
+        .wallet-container {
+            display: flex;
+            align-items: center;
+            background: rgba(10, 12, 16, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(20px);
+            padding: 10px 22px;
+            border-radius: 20px;
+            gap: 25px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+        }
+        .currency-item { display: flex; align-items: center; gap: 12px; }
+        .currency-item span { font-size: 20px; font-weight: 900; letter-spacing: 1px; }
+        .icon-rub-box { color: var(--primary); text-shadow: 0 0 10px rgba(0, 255, 136, 0.5); }
+        .nc-glitch {
+            background: linear-gradient(135deg, #ff00ff, #00d2ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 8px rgba(255, 0, 255, 0.4));
+            animation: pulse-nc 2s infinite ease-in-out;
+        }
+        .icon-nc-diamond { font-size: 22px; filter: drop-shadow(0 0 5px var(--accent)); animation: rotate-nc 3s infinite linear; display: inline-block; }
+        @keyframes pulse-nc { 0%, 100% { transform: scale(1); filter: brightness(1); } 50% { transform: scale(1.05); filter: brightness(1.3); } }
+        @keyframes rotate-nc { 0% { transform: rotateY(0deg); } 100% { transform: rotateY(360deg); } }
+        .wallet-sep { width: 2px; height: 30px; background: linear-gradient(to bottom, transparent, rgba(255,255,255,0.1), transparent); }
+
+        .card { background: var(--card-bg); border-radius: 30px; padding: 25px; border: 1px solid rgba(255,255,255,0.05); backdrop-filter: blur(15px); margin-bottom: 25px; position: relative; }
+        .action-btn { background: linear-gradient(135deg, var(--primary), #00cc6e); color: #000; border: none; width: 100%; padding: 18px; border-radius: 20px; font-weight: 800; cursor: pointer; transition: 0.3s; }
+        .action-btn:hover:not(:disabled) { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0,255,136,0.5); }
+        .action-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        @keyframes flow { 0% { background-position: 0% 50%; } 100% { background-position: 100% 50%; } }
+        .nick-toxic { background: linear-gradient(90deg, #0f8, #adff2f, #0f8); background-size: 200%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: flow 2s infinite linear; font-weight: bold; }
+        .nick-rainbow { background: linear-gradient(90deg, #f00, #0f0, #0ff, #f0f, #f00); background-size: 300%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: flow 5s infinite linear; }
+        .status-god { background: linear-gradient(90deg, #ff0055, #00ff88, #00d2ff, #ff0055); background-size: 300%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: flow 3s infinite linear; font-weight: 900; }
+        .nick-black-red { background: linear-gradient(90deg, #000, #f00, #000); background-size: 200%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: flow 3s infinite linear; font-weight: bold; }
+        .nick-black-white { background: linear-gradient(90deg, #000, #fff, #000); background-size: 200%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: flow 3s infinite linear; font-weight: bold; }
+        .nick-black-purple { background: linear-gradient(90deg, #000, #a0f, #000); background-size: 200%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: flow 3s infinite linear; font-weight: bold; }
+        .nick-blue-red { background: linear-gradient(90deg, #00f, #f00, #00f); background-size: 200%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: flow 3s infinite linear; font-weight: bold; }
+
+        .custom-ava-container { width: 60px; height: 60px; background: #111; border-radius: 15px; overflow: hidden; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(255,255,255,0.1); }
+        .slots-row { background: #050608; padding: 25px; border-radius: 40px; display: flex; gap: 15px; margin-bottom: 25px; justify-content: center; }
+        .window { width: 110px; height: 110px; background: #111; border-radius: 20px; overflow: hidden; position: relative; border: 1px solid #222; }
+        .strip { position: absolute; width: 100%; top: 0; left: 0; }
+        .item { height: 110px; display: flex; justify-content: center; align-items: center; font-size: 55px; }
+
+        #roulette { width: 100%; height: 180px; background: #000; border-radius: 30px; position: relative; overflow: hidden; border: 2px solid #222; display: none; margin-bottom: 30px; }
+        #case-line { position: absolute; top: 0; left: 0; height: 100%; display: flex; align-items: center; transition: 5s cubic-bezier(0.15, 0, 0.05, 1); }
+        .case-item { min-width: 170px; height: 130px; background: #1a1d23; margin: 0 10px; border-radius: 20px; display: flex; flex-direction: column; justify-content: center; align-items: center; border-bottom: 4px solid var(--primary); font-size: 22px; font-weight: bold; color: var(--primary); }
+
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: none; justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(10px); }
+        .modal { background: #13171c; width: 450px; padding: 35px; border-radius: 40px; text-align: center; border: 1px solid rgba(255,255,255,0.1); position: relative; }
+        input, select { width: 100%; background: #0a0c0f; border: 1px solid #222; padding: 18px; border-radius: 20px; color: white; margin: 12px 0; outline: none; text-align: center; font-weight: bold; }
+        .price-tag { position: absolute; top: -12px; right: 20px; background: #000; padding: 2px 10px; border-radius: 10px; font-size: 11px; font-weight: 800; border: 1px solid #333; }
+        
+        .receipt { background: #fff; color: #000; border-radius: 25px; padding: 25px; margin-top: 10px; text-align: left; position: relative; }
+        .receipt-head { border-bottom: 2px dashed #ccc; padding-bottom: 15px; margin-bottom: 15px; text-align: center; }
+        .receipt-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 14px; }
+        .qr-area { text-align: center; margin-top: 15px; }
+        .qr-area img { width: 140px; height: 140px; border: 1px solid #eee; padding: 5px; }
+
+        /* НОВЫЙ ДИЗАЙН УВЕДОМЛЕНИЙ */
+        .win-lose-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            pointer-events: none;
+            animation: toastFade 2s forwards;
+        }
+        .result-content {
+            padding: 40px 80px;
+            border-radius: 30px;
+            font-size: 42px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            backdrop-filter: blur(15px);
+            border: 2px solid rgba(255,255,255,0.1);
+            text-align: center;
+        }
+        .res-win { 
+            color: #00ff88; 
+            background: rgba(0, 255, 136, 0.1); 
+            box-shadow: 0 0 100px rgba(0, 255, 136, 0.3);
+            text-shadow: 0 0 20px rgba(0, 255, 136, 0.8);
+        }
+        .res-lose { 
+            color: #ff4444; 
+            background: rgba(255, 68, 68, 0.1); 
+            box-shadow: 0 0 100px rgba(255, 68, 68, 0.3);
+            text-shadow: 0 0 20px rgba(255, 68, 68, 0.8);
+        }
+        @keyframes toastFade {
+            0% { opacity: 0; transform: scale(0.8); }
+            15% { opacity: 1; transform: scale(1); }
+            85% { opacity: 1; transform: scale(1); }
+            100% { opacity: 0; transform: scale(1.1); }
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <div class="logo">GLITCH WIN</div>
+        <div class="nav-item active" onclick="showPage('slots', this)">🎰 Играть</div>
+        <div class="nav-item" onclick="showPage('shop', this)">🛒 Магазин</div>
+        <div class="nav-item" onclick="openMod('promo-modal')">🎁 Промокод</div>
+        <div class="nav-item" onclick="openMod('w-modal')" style="margin-top:auto; color: var(--primary);">💸 Вывод средств</div>
+    </nav>
+
+    <main>
+        <div style="width: 100%; display: flex; justify-content: flex-end; margin-bottom: 30px;">
+            <div class="wallet-container">
+                <div class="currency-item">
+                    <div class="icon-rub-box" style="font-size: 22px; font-weight: 900;">₽</div>
+                    <span id="m-val" style="color: #eee;">0</span>
+                </div>
+                <div class="wallet-sep"></div>
+                <div class="currency-item">
+                    <div class="icon-nc-diamond">💎</div>
+                    <span id="nc-val" class="nc-glitch">0</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="slots-page" class="page active">
+            <div class="card" style="display:flex; align-items:center; gap:20px; cursor:pointer;" onclick="openMod('p-modal')">
+                <div id="main-ava" class="custom-ava-container" style="width:70px; height:70px; font-size:30px;">😎</div>
+                <div style="text-align:left;">
+                    <b id="main-nick" style="font-size:24px;">Игрок</b><br>
+                    <span id="main-status" style="font-size:12px; font-weight: 900; opacity: 0.8;">НОВИЧОК</span>
+                </div>
+            </div>
+            <div class="card" style="text-align: center;">
+                <div class="slots-row">
+                    <div class="window"><div id="s1" class="strip"></div></div>
+                    <div class="window"><div id="s2" class="strip"></div></div>
+                    <div class="window"><div id="s3" class="strip"></div></div>
+                </div>
+                <input type="number" id="bet-input" value="500">
+                <button id="spin-btn" class="action-btn" onclick="spin()" style="height:70px;">КРУТИТЬ</button>
+            </div>
+        </div>
+
+        <div id="shop-page" class="page">
+            <h2 style="color:var(--primary); margin-bottom: 20px;">📦 КЕЙСЫ</h2>
+            <div id="roulette"><div id="case-line"></div></div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-bottom: 35px;">
+                <div class="card" style="text-align:center;"><span class="price-tag">500 ₽</span><h3>БОМЖ</h3><button class="action-btn" onclick="openCase('cheap', 500)">Открыть</button></div>
+                <div class="card" style="text-align:center; border-color:gold;"><span class="price-tag">10.000 ₽</span><h3>ОЛИГАРХ</h3><button class="action-btn" style="background:gold;" onclick="openCase('rich', 10000)">Открыть</button></div>
+                <div class="card" style="text-align:center; border-color:var(--secondary);"><span class="price-tag">67.000 ₽</span><h3>РАРИТЕТ</h3><button class="action-btn" style="background:var(--secondary);" onclick="openCase('rare', 67000)">Открыть</button></div>
+            </div>
+
+            <h2 style="color:var(--accent); margin-bottom: 15px;">💎 ЭКСКЛЮЗИВ</h2>
+            <div class="card" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                <div><h3 class="status-god">GOD STATUS</h3><p style="font-size:11px;">Множитель x50 | 500 NC</p></div>
+                <button id="god-btn" class="action-btn" style="width:120px; background:var(--accent);" onclick="buyNCItem('GOD', 500)">Купить</button>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 35px;">
+                <div class="card" style="text-align:center;"><span class="nick-toxic">TOXIC</span><button class="action-btn" onclick="buyItemNC(100, 'nick-toxic')">100 NC</button></div>
+                <div class="card" style="text-align:center;"><span class="nick-rainbow">RAINBOW</span><button class="action-btn" onclick="buyItemNC(250, 'nick-rainbow')">250 NC</button></div>
+                <div class="card" style="text-align:center;"><span class="nick-black-red">B-RED</span><button class="action-btn" onclick="buyItemNC(150, 'nick-black-red')">150 NC</button></div>
+                <div class="card" style="text-align:center;"><span class="nick-black-white">B-WHITE</span><button class="action-btn" onclick="buyItemNC(150, 'nick-black-white')">150 NC</button></div>
+                <div class="card" style="text-align:center;"><span class="nick-black-purple">B-PURPLE</span><button class="action-btn" onclick="buyItemNC(180, 'nick-black-purple')">180 NC</button></div>
+                <div class="card" style="text-align:center;"><span class="nick-blue-red">BLUE-RED</span><button class="action-btn" onclick="buyItemNC(200, 'nick-blue-red')">200 NC</button></div>
+            </div>
+
+            <h2 style="margin: 20px 0;">😀 СТАНДАРТНЫЕ АВАТАРКИ</h2>
+            <div id="ava-shop-list" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 10px;"></div>
+        </div>
+    </main>
+
+    <div id="result-toast" class="win-lose-overlay">
+        <div id="result-content" class="result-content"></div>
+    </div>
+
+    <div class="modal-overlay" id="promo-modal"><div class="modal"><h2>ПРОМОКОД</h2><input type="text" id="promo-input" placeholder="Введите код"><button class="action-btn" onclick="usePromo()">АКТИВИРОВАТЬ</button><button class="action-btn" style="background:none; color:white; margin-top:10px;" onclick="closeMod('promo-modal')">ЗАКРЫТЬ</button></div></div>
+    <div class="modal-overlay" id="w-modal"><div class="modal"><span style="position:absolute; top:15px; right:20px; cursor:pointer;" onclick="closeMod('w-modal')">&times;</span><h2>ВЫВОД СРЕДСТВ</h2><select id="w-method" onchange="toggleSbpBanks()"><option value="card">💳 Банковская карта</option><option value="sbp">📲 СБП (По номеру)</option><option value="sim">📱 На номер SIM</option></select><select id="sbp-bank" style="display: none;"><option value="Сбербанк">Сбербанк</option><option value="Т-Банк (Тинькофф)">Т-Банк (Тинькофф)</option><option value="Альфа-Банк">Альфа-Банк</option><option value="ВТБ">ВТБ</option><option value="Озон Банк">Озон Банк</option><option value="Газпромбанк">Газпромбанк</option></select><input type="text" id="w-dest" placeholder="Номер карты"><input type="number" id="w-amount" placeholder="Сумма (мин. 1.000 ₽)"><button class="action-btn" onclick="withdraw()">ПОДТВЕРДИТЬ</button></div></div>
+    <div class="modal-overlay" id="check-modal"><div class="modal"><h2 style="color:var(--primary); margin-bottom:15px;">ВЫВОД УСПЕШЕН</h2><div class="receipt"><div class="receipt-head"><b style="font-size:18px;">GLITCH WIN ЧЕК</b><br><small style="opacity:0.6;" id="c-date"></small></div><div class="receipt-row"><span>Сумма:</span><b id="c-sum"></b></div><div class="receipt-row"><span>Метод:</span><b id="c-method"></b></div><div class="receipt-row"><span>Получатель:</span><b id="c-dest"></b></div><div class="receipt-row"><span>Статус:</span><b style="color:#00cc6e;">ВЫПОЛНЕНО</b></div><div class="qr-area"><img id="c-qr" src="" alt="QR"></div></div><button class="action-btn" style="margin-top:20px;" onclick="closeMod('check-modal')">ОТЛИЧНО</button></div></div>
+    <div class="modal-overlay" id="p-modal"><div class="modal"><span style="position:absolute; top:15px; right:20px; cursor:pointer;" onclick="closeMod('p-modal')">&times;</span><h2>ПРОФИЛЬ</h2><input type="text" id="edit-nick" placeholder="Новый ник"><div id="p-ava-list" style="display:flex; justify-content:center; gap:10px; margin-bottom:15px; flex-wrap:wrap;"></div><button class="action-btn" onclick="saveProfile()">СОХРАНИТЬ</button></div></div>
+
+    <script>
+        let savedData = JSON.parse(localStorage.getItem('neonWinUser')) || {};
+        let user = { 
+            money: savedData.money ?? 100000, 
+            nc: savedData.nc ?? 50, 
+            nick: savedData.nick ?? "Игрок", 
+            ava: savedData.ava ?? "😎", 
+            status: savedData.status ?? "НОВИЧОК", 
+            luck: savedData.luck ?? 0.3, 
+            mult: savedData.mult ?? 5, 
+            currentColor: savedData.currentColor ?? "", 
+            ownedAvas: savedData.ownedAvas ?? ["😎"], 
+            ownedColors: savedData.ownedColors ?? [], 
+            usedPromos: savedData.usedPromos ?? [] 
+        };
+
+        const avas = ["🥷","👻","👹","🤖","🧛","👾","👽","🤡"];
+        const emojis = ['💎', '7️⃣', '🍋', '🍎', '🍒'];
+        let isSpinning = false;
+
+        function fmt(num) { return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "."); }
+        function saveToLocal() { localStorage.setItem('neonWinUser', JSON.stringify(user)); }
+
+        function playSound(freq, type, dur) {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, ctx.currentTime);
+                gain.gain.setValueAtTime(0.05, ctx.currentTime);
+                osc.connect(gain); gain.connect(ctx.destination);
+                osc.start(); osc.stop(ctx.currentTime + dur);
+            } catch(e) {}
+        }
+
+        function updateStatsByColor() {
+            if (user.status === "GOD") return; 
+            switch(user.currentColor) {
+                case 'nick-toxic': user.luck = 0.5; user.mult = 8; break;
+                case 'nick-rainbow': user.luck = 0.6; user.mult = 15; break;
+                case 'nick-black-red': user.luck = 0.45; user.mult = 10; break;
+                case 'nick-black-white': user.luck = 0.4; user.mult = 12; break;
+                case 'nick-black-purple': user.luck = 0.55; user.mult = 10; break;
+                case 'nick-blue-red': user.luck = 0.5; user.mult = 14; break;
+                default: user.luck = 0.3; user.mult = 5;
+            }
+        }
+
+        function updateUI() {
+            updateStatsByColor();
+            saveToLocal();
+            document.getElementById('m-val').innerText = fmt(user.money);
+            document.getElementById('nc-val').innerText = fmt(user.nc);
+            const nEl = document.getElementById('main-nick');
+            nEl.innerText = user.nick;
+            nEl.className = user.currentColor || (user.status === "GOD" ? "status-god" : "");
+            document.getElementById('main-ava').innerText = user.ava;
+            document.getElementById('main-status').innerText = user.status;
+            if(user.status === "GOD") document.getElementById('god-btn').disabled = true;
+
+            document.getElementById('ava-shop-list').innerHTML = avas.map(a => `
+                <div class="card" style="padding:15px; text-align:center; margin:0;">
+                    <div style="font-size:30px; margin-bottom:10px;">${a}</div>
+                    <button class="action-btn" style="padding:8px; font-size:12px;" onclick="buyItem('ava', 1500, '${a}')" ${user.ownedAvas.includes(a)?'disabled':''}>
+                        ${user.ownedAvas.includes(a)?'КУПЛЕНО':'1.500 ₽'}
+                    </button>
+                </div>
+            `).join('');
+            document.getElementById('p-ava-list').innerHTML = user.ownedAvas.map(a => `
+                <div onclick="user.ava='${a}'; updateUI(); playSound(500, 'sine', 0.1);" style="cursor:pointer; padding:5px; font-size:25px; border:2px solid ${user.ava===a?'var(--primary)':'transparent'}; border-radius:10px;">${a}</div>
+            `).join('');
+        }
+
+        function toggleSbpBanks() { 
+            const m = document.getElementById('w-method').value; 
+            document.getElementById('sbp-bank').style.display = m==='sbp'?'block':'none'; 
+        }
+        
+        function withdraw() {
+            let d = document.getElementById('w-dest').value.trim(); 
+            let a = parseInt(document.getElementById('w-amount').value);
+            if (isNaN(a) || a < 1000 || user.money < a) return showRes(false, "ОШИБКА СРЕДСТВ");
+            user.money -= a; updateUI(); closeMod('w-modal');
+            document.getElementById('c-sum').innerText = fmt(a) + ' ₽';
+            let m = document.getElementById('w-method').value; 
+            let b = document.getElementById('sbp-bank').value; 
+            document.getElementById('c-method').innerText = (m==='sbp'?'СБП ('+b+')':(m==='card'?'Карта':'SIM'));
+            document.getElementById('c-dest').innerText = d.slice(0,4)+'***'+d.slice(-4);
+            document.getElementById('c-date').innerText = new Date().toLocaleString();
+            document.getElementById('c-qr').src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=GW-${a}-${Date.now()}`;
+            openMod('check-modal');
+            playSound(440, 'sine', 0.2);
+        }
+
+        function usePromo() {
+            let c = document.getElementById('promo-input').value.toUpperCase().trim();
+            if(!c || user.usedPromos.includes(c)) return;
+            if(c === "NEON2026") { user.money += 50000; user.usedPromos.push(c); showRes(true, `+ 50.000 ₽`); playSound(800, 'sine', 0.3); }
+            else if(c === "LUCH") { user.nc += 10; user.usedPromos.push(c); showRes(true, `+ 10 NC`); playSound(800, 'sine', 0.3); }
+            updateUI(); closeMod('promo-modal');
+        }
+
+        function buyItem(type, price, val) { 
+            if(user.money >= price) { user.money -= price; if(type==='ava') user.ownedAvas.push(val); updateUI(); playSound(600, 'sine', 0.1); } 
+            else showRes(false, "НЕДОСТАТОЧНО ₽");
+        }
+        
+        function buyItemNC(price, val) { 
+            if(user.nc >= price) { 
+                user.nc -= price; 
+                user.currentColor = val; 
+                updateUI(); 
+                playSound(700, 'triangle', 0.2);
+            } else showRes(false, "НЕДОСТАТОЧНО NC"); 
+        }
+
+        // ОБНОВЛЕННАЯ ФУНКЦИЯ СПИНА
+        function spin() {
+            let bet = parseInt(document.getElementById('bet-input').value);
+            if(user.money < bet) return showRes(false, "МАЛО ДЕНЕГ");
+            if(isSpinning) return;
+
+            isSpinning = true; 
+            user.money -= bet; // Снимаем ставку за вход
+            updateUI();
+
+            [1,2,3].forEach(i => {
+                const s = document.getElementById('s'+i); s.style.transition = 'none'; s.style.top = '0';
+                setTimeout(() => { s.style.transition = 'top 3s cubic-bezier(0.15, 0, 0.05, 1)'; s.style.top = `-${(Math.floor(Math.random()*30)+40)*110}px`; }, 50);
+            });
+
+            setTimeout(() => { 
+                isSpinning = false; 
+                if(Math.random() < user.luck) { 
+                    let win = bet * user.mult; 
+                    user.money += win; 
+                    showRes(true, `ВЫИГРЫШ\n+${fmt(win)} ₽`); 
+                    playSound(800, 'sine', 0.3);
+                } 
+                else { 
+                    user.money -= bet; // ПРОИГРЫШ УБАВЛЯЕТ БАЛАНС
+                    showRes(false, `ПРОИГРЫШ\n-${fmt(bet)} ₽`); 
+                    playSound(200, 'square', 0.3);
+                }
+                updateUI(); 
+            }, 3200);
+        }
+
+        function openCase(type, price) {
+            if(user.money < price) return showRes(false, "МАЛО ДЕНЕГ");
+            if(isSpinning) return;
+            user.money -= price; updateUI(); isSpinning = true;
+            playSound(200, 'square', 0.1);
+            const r = document.getElementById('roulette'); const l = document.getElementById('case-line');
+            r.style.display = 'block'; l.innerHTML = ''; 
+            let isNC = (type==='rare');
+            let winVal = isNC ? Math.floor(Math.random()*100) : Math.floor(Math.random()*price*3);
+            for(let i=0; i<60; i++) l.innerHTML += `<div class="case-item">${isNC?'NC':'₽'}</div>`;
+            l.children[50].innerHTML = `<b>${fmt(winVal)} ${isNC?'NC':'₽'}</b>`;
+            l.style.transition = 'none'; l.style.transform = 'translateX(0)';
+            setTimeout(() => { l.style.transition = 'transform 5s cubic-bezier(0.15, 0, 0.05, 1)'; l.style.transform = `translateX(-${(50*190)-(r.offsetWidth/2)+95}px)`; }, 50);
+            setTimeout(() => { 
+                isSpinning = false; if(isNC) user.nc += winVal; else user.money += winVal; 
+                r.style.display = 'none'; updateUI(); playSound(1000, 'sine', 0.3);
+                showRes(true, `КЕЙС: ${fmt(winVal)} ${isNC?'NC':'₽'}`);
+            }, 5500);
+        }
+
+        function buyNCItem(st, p) { 
+            if(user.nc >= p) { user.nc -= p; user.status = st; user.luck = 0.8; user.mult = 50; updateUI(); playSound(1200, 'sine', 0.5); } 
+            else showRes(false, "МАЛО NC");
+        }
+
+        // ОБНОВЛЕННАЯ ФУНКЦИЯ ОТОБРАЖЕНИЯ РЕЗУЛЬТАТА
+        function showRes(win, t) { 
+            const toast = document.getElementById('result-toast');
+            const content = document.getElementById('result-content');
+            content.innerText = t;
+            content.className = 'result-content ' + (win ? 'res-win' : 'res-lose');
+            toast.style.display = 'flex';
+            toast.style.animation = 'none';
+            toast.offsetHeight; 
+            toast.style.animation = 'toastFade 2s forwards';
+            setTimeout(() => { toast.style.display = 'none'; }, 2000);
+        }
+
+        function saveProfile() { let n = document.getElementById('edit-nick').value; if(n) user.nick = n; updateUI(); closeMod('p-modal'); }
+        function openMod(id) { document.getElementById(id).style.display='flex'; }
+        function closeMod(id) { document.getElementById(id).style.display='none'; }
+        
+        function showPage(p, el) {
+            document.querySelectorAll('.page').forEach(pg=>pg.classList.remove('active'));
+            document.getElementById(p+'-page').classList.add('active');
+            document.querySelectorAll('.nav-item').forEach(i=>i.classList.remove('active'));
+            el.classList.add('active');
+            playSound(300, 'sine', 0.05);
+        }
+
+        [1,2,3].forEach(i => {
+            let h = ''; for(let j=0; j<100; j++) h += `<div class="item">${emojis[Math.floor(Math.random()*5)]}</div>`;
+            document.getElementById('s'+i).innerHTML = h;
+        });
+        updateUI();
+    </script>
+</body>
+</html>
