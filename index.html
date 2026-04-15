@@ -19,13 +19,13 @@
             --overlord: #ff0055;
             --owner: #ffffff;
             --full-access: #bc13fe;
+            --input-bg: rgba(0, 0, 0, 0.4);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
         body { background: var(--bg); color: white; display: flex; min-height: 100vh; overflow: hidden; }
         *::-webkit-scrollbar { display: none; }
 
-        /* ОКНО АВТОРИЗАЦИИ / РЕГИСТРАЦИИ */
         #auth-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: var(--bg);
@@ -68,7 +68,6 @@
         .action-btn:hover:not(:disabled) { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0,255,136,0.5); }
         .action-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-        /* СТАТУСЫ АНАРХИИ */
         @keyframes flow { 0% { background-position: 0% 50%; } 100% { background-position: 100% 50%; } }
         .status-god { background: linear-gradient(90deg, #ff0055, #00ff88, #00d2ff, #ff0055); background-size: 300%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: flow 3s infinite linear; font-weight: 900; }
         .status-vip { color: var(--vip); text-shadow: 0 0 10px var(--vip); font-weight: 900; }
@@ -78,7 +77,6 @@
         .status-owner { background: linear-gradient(90deg, #fff, #888, #fff); background-size: 200%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: flow 4s infinite linear; font-weight: 900; text-shadow: 0 0 25px #fff; }
         .status-fa { background: linear-gradient(90deg, #bc13fe, #ff00ff, #bc13fe); background-size: 200%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: flow 2s infinite linear; font-weight: 900; text-shadow: 0 0 20px var(--full-access); }
 
-        /* ЦВЕТНЫЕ НИКИ */
         .nick-toxic { background: linear-gradient(90deg, #0f8, #adff2f, #0f8); background-size: 200%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: flow 2s infinite linear; font-weight: bold; }
         .nick-rainbow { background: linear-gradient(90deg, #f00, #0f0, #0ff, #f0f, #f00); background-size: 300%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: flow 5s infinite linear; }
         .nick-black-red { background: linear-gradient(90deg, #000, #f00, #000); background-size: 200%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: flow 3s infinite linear; font-weight: bold; }
@@ -180,10 +178,17 @@
             <div class="status-grid">
                 <div class="status-card" id="fa-card" style="background: rgba(188, 19, 254, 0.1); border-color: var(--full-access); grid-column: span 2;" onclick="buyFullAccess()">
                     <h3 class="status-fa">FULL ACCESS</h3>
+                    <ul><li>ВЫДАЧА КЕЙСОВ: АКТИВИРОВАНО</li><li>СЕКРЕТНЫЕ ФУНКЦИИ</li></ul>
                     <div class="price" id="fa-price-label">10.000 NC</div>
                 </div>
-                <div class="status-card" onclick="buyStatus('VIP', 25000)"><h3 class="status-vip">VIP</h3><div class="price">25.000 ₽</div></div>
-                <div class="status-card" onclick="buyStatus('PREMIUM', 10000)"><h3 class="status-premium">PREMIUM</h3><div class="price">10.000 ₽</div></div>
+                <div class="status-card" onclick="buyStatus('VIP', 25000)">
+                    <h3 class="status-vip">VIP</h3>
+                    <div class="price">25.000 ₽</div>
+                </div>
+                <div class="status-card" onclick="buyStatus('PREMIUM', 10000)">
+                    <h3 class="status-premium">PREMIUM</h3>
+                    <div class="price">10.000 ₽</div>
+                </div>
                 <div class="status-card" onclick="buyNCItem('GOD', 500)"><h3 class="status-god">GOD</h3><div class="price">500 NC</div></div>
                 <div class="status-card" onclick="buyNCItem('ULTRA', 1500)"><h3 class="status-ultra">ULTRA</h3><div class="price">1.500 NC</div></div>
                 <div class="status-card" onclick="buyNCItem('OVERLORD', 5000)"><h3 class="status-overlord">OVERLORD</h3><div class="price">5.000 NC</div></div>
@@ -199,6 +204,7 @@
                 <div class="card" style="text-align:center; border-color:gold;"><span class="price-tag">10.000 ₽</span><h3>ОЛИГАРХ</h3><button class="action-btn" style="background:gold;" onclick="openCase('rich', 10000)">Открыть</button></div>
                 <div class="card" style="text-align:center; border-color:var(--secondary);"><span class="price-tag">67.000 ₽</span><h3>РАРИТЕТ</h3><button class="action-btn" style="background:var(--secondary);" onclick="openCase('rare', 67000)">Открыть</button></div>
             </div>
+
             <h2 style="margin: 20px 0;">🌈 НИКИ</h2>
             <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 35px;">
                 <div class="card" style="text-align:center;"><span class="nick-toxic">TOXIC</span><button class="action-btn" onclick="buyItemNC(100, 'nick-toxic')">100 NC</button></div>
@@ -223,7 +229,7 @@
             </select>
             <select id="sbp-bank" style="display:none;">
                 <option value="sber">Сбербанк</option>
-                <option value="tinkoff">Т-Банк</option>
+                <option value="tinkoff">Т-Банк (Тинькофф)</option>
             </select>
             <input type="text" id="w-dest" placeholder="Номер">
             <input type="number" id="w-amount" placeholder="Сумма">
@@ -246,7 +252,6 @@
         const emojis = ['💎', '7️⃣', '🍋', '🍎', '🍒'];
         let isSpinning = false;
 
-        // ФУНКЦИИ АВТОРИЗАЦИИ / РЕГИСТРАЦИИ
         function toggleAuth() {
             isAuthReg = !isAuthReg;
             document.getElementById('auth-title').innerText = isAuthReg ? "РЕГИСТРАЦИЯ" : "ВХОД";
@@ -259,15 +264,13 @@
             const nickInput = document.getElementById('auth-nick').value;
             if(!email.includes('@')) return alert("Введите Email");
             let db = JSON.parse(localStorage.getItem('glitch_users_db') || "{}");
-            
             if(isAuthReg) {
                 if(nickInput.length < 2) return alert("Ник слишком короткий");
-                if(db[email]) return alert("Email уже занят");
                 db[email] = { ...user, nick: nickInput, email: email };
                 localStorage.setItem('glitch_users_db', JSON.stringify(db));
                 user = db[email];
             } else {
-                if(!db[email]) return alert("Аккаунт не найден. Зарегистрируйтесь.");
+                if(!db[email]) return alert("Аккаунт не найден");
                 user = db[email];
             }
             saveToLocal();
@@ -281,6 +284,11 @@
             document.getElementById('auth-overlay').style.display = 'none';
             document.getElementById('main-nav').style.display = 'flex';
             document.getElementById('main-content').style.display = 'flex';
+        }
+
+        function toggleSbpBanks() {
+            const method = document.getElementById('w-method').value;
+            document.getElementById('sbp-bank').style.display = (method === 'sbp') ? 'block' : 'none';
         }
 
         function fmt(num) { return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "."); }
@@ -303,10 +311,7 @@
             if (user.status === "VIP") nEl.className = "status-vip";
             if (user.status === "PREMIUM") nEl.className = "status-premium";
             if (user.status === "FULL ACCESS") nEl.className = "status-fa";
-            if (user.status === "GOD") nEl.className = "status-god";
-            if (user.status === "ULTRA") nEl.className = "status-ultra";
-            if (user.status === "OVERLORD") nEl.className = "status-overlord";
-            if (user.status === "OWNER") nEl.className = "status-owner";
+            // ... другие классы ...
 
             document.getElementById('main-ava').innerText = user.ava;
             document.getElementById('main-status').innerText = user.status;
@@ -325,41 +330,67 @@
             `).join('');
         }
 
+        function buyStatus(st, price) {
+            if(user.money >= price) { user.money -= price; user.status = st; updateUI(); showRes(true, "КУПЛЕНО"); }
+            else showRes(false, "МАЛО ДЕНЕГ");
+        }
+
+        function buyNCItem(st, price) {
+            if(user.nc >= price) { user.nc -= price; user.status = st; updateUI(); showRes(true, "КУПЛЕНО"); }
+            else showRes(false, "МАЛО NC");
+        }
+
+        function buyFullAccess() {
+            if(user.nc >= 10000) { user.nc -= 10000; user.hasFullAccess = true; user.status = "FULL ACCESS"; updateUI(); }
+        }
+
         function spin() {
             let betInput = document.getElementById('bet-input');
             let bet = parseInt(betInput.value);
             if(user.money < bet || isSpinning) return;
-            
-            isSpinning = true; 
-            betInput.disabled = true; // БЛОКИРУЕМ СТАВКУ
-            user.money -= bet; 
-            updateUI();
-
+            isSpinning = true; betInput.disabled = true; user.money -= bet; updateUI();
             [1,2,3].forEach(i => {
                 const s = document.getElementById('s'+i); s.style.transition = 'none'; s.style.top = '0';
                 setTimeout(() => { s.style.transition = 'top 3s cubic-bezier(0.15, 0, 0.05, 1)'; s.style.top = `-${(Math.floor(Math.random()*30)+40)*110}px`; }, 50);
             });
             setTimeout(() => { 
-                isSpinning = false; 
-                betInput.disabled = false; // РАЗБЛОКИРУЕМ СТАВКУ
+                isSpinning = false; betInput.disabled = false;
                 if(Math.random() < user.luck) { let win = bet * user.mult; user.money += win; showRes(true, `+${fmt(win)} ₽`); }
-                else { showRes(false, `-${fmt(bet)} ₽`); }
+                else showRes(false, `-${fmt(bet)} ₽`);
                 updateUI(); 
             }, 3200);
         }
 
-        // Остальные функции (магазин, статусы, кейсы)
-        function buyStatus(st, price) { if(user.money >= price) { user.money -= price; user.status = st; if(st==='VIP'){user.luck=0.7;user.mult=30;} if(st==='PREMIUM'){user.luck=0.5;user.mult=20;} updateUI(); } }
-        function buyNCItem(st, price) { if(user.nc >= price) { user.nc -= price; user.status = st; updateUI(); } }
-        function buyFullAccess() { if(user.nc >= 10000) { user.nc -= 10000; user.hasFullAccess = true; user.status = "FULL ACCESS"; updateUI(); } }
-        function openCase(type, pr) { if(user.money>=pr) { user.money-=pr; updateUI(); document.getElementById('roulette').style.display='block'; setTimeout(()=>{document.getElementById('roulette').style.display='none'; user.money+=pr*2; updateUI();}, 2000); } }
-        function showRes(w,t){ const o = document.getElementById('result-toast'); document.getElementById('result-content').innerText=t; o.style.display='flex'; setTimeout(()=>o.style.display='none', 2000); }
-        function showPage(p, el) { document.querySelectorAll('.page').forEach(pg=>pg.classList.remove('active')); document.getElementById(p+'-page').classList.add('active'); document.querySelectorAll('.nav-item').forEach(i=>i.classList.remove('active')); el.classList.add('active'); }
+        function openCase(type, price) {
+            if(user.money < price && price > 0) return;
+            isSpinning = true; user.money -= price; updateUI();
+            const r = document.getElementById('roulette'); const l = document.getElementById('case-line');
+            r.style.display = 'block'; l.innerHTML = ''; 
+            for(let i=0; i<60; i++) l.innerHTML += `<div class="case-item">?</div>`;
+            l.style.transition = 'transform 5s cubic-bezier(0.15, 0, 0.05, 1)';
+            l.style.transform = `translateX(-${50*190}px)`;
+            setTimeout(() => { isSpinning = false; r.style.display = 'none'; user.money += 1000; updateUI(); }, 5500);
+        }
+
+        function showRes(win, t) { 
+            const toast = document.getElementById('result-toast'); const content = document.getElementById('result-content');
+            content.innerText = t; content.className = 'result-content ' + (win ? 'res-win' : 'res-lose');
+            toast.style.display = 'flex';
+            setTimeout(() => { toast.style.display = 'none'; }, 2000);
+        }
+
+        function showPage(p, el) {
+            document.querySelectorAll('.page').forEach(pg=>pg.classList.remove('active'));
+            document.getElementById(p+'-page').classList.add('active');
+            document.querySelectorAll('.nav-item').forEach(i=>i.classList.remove('active'));
+            el.classList.add('active');
+        }
+
         function openMod(id) { document.getElementById(id).style.display='flex'; }
         function closeMod(id) { document.getElementById(id).style.display='none'; }
-        function buyItemNC(p, v) { if(user.nc >= p) { user.nc -= p; user.currentColor = v; updateUI(); } }
-        function buyItem(t, p, v) { if(user.money >= p) { user.money -= p; user.ownedAvas.push(v); updateUI(); } }
         function saveProfile() { let n = document.getElementById('edit-nick').value; if(n) user.nick = n; updateUI(); closeMod('p-modal'); }
+        function buyItem(type, price, val) { if(user.money >= price) { user.money -= price; user.ownedAvas.push(val); updateUI(); } }
+        function buyItemNC(price, val) { if(user.nc >= price) { user.nc -= price; user.currentColor = val; updateUI(); } }
 
         [1,2,3].forEach(i => {
             let h = ''; for(let j=0; j<100; j++) h += `<div class="item">${emojis[Math.floor(Math.random()*5)]}</div>`;
