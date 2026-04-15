@@ -1,0 +1,128 @@
+// --- 1. ИНИЦИАЛИЗАЦИЯ (ТВОИ КЛЮЧИ) ---
+emailjs.init("tkPNGqpaNo-3947PkA7Y5");
+
+const firebaseConfig = {
+    apiKey: "AIzaSyCa2iDr1kjpnEvzlAzqNkGSAVLY4NxqFBk",
+    authDomain: "glitch-win.firebaseapp.com",
+    projectId: "glitch-win",
+    storageBucket: "glitch-win.firebasestorage.app",
+    messagingSenderId: "466292036880",
+    appId: "1:466292036880:web:c88815661cce17d8804195",
+    measurementId: "G-7SVRH8P9ZD",
+    databaseURL: "https://glitch-win-default-rtdb.firebaseio.com" 
+};
+
+firebase.initializeApp(firebaseConfig);
+const database = firebase.database();
+
+// --- 2. ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ---
+let isAuthReg = false;
+let generatedCode = null;
+let user = { 
+    money: 100000, nc: 50, nick: "Игрок", ava: "😎", status: "НОВИЧОК", 
+    luck: 0.3, mult: 5, currentColor: "", ownedAvas: ["😎"], usedPromos: [], hasFullAccess: false
+};
+
+const getEmailKey = (email) => email.replace(/\./g, '_');
+
+// --- 3. ЛОГИКА ОБЛАКА И ПОЧТЫ ---
+
+function saveToCloud() {
+    if (user && user.email) {
+        database.ref('users/' + getEmailKey(user.email)).set(user);
+    }
+    localStorage.setItem('neonWinUser', JSON.stringify(user));
+}
+
+async function sendEmailCode(userEmail, code) {
+    try {
+        await emailjs.send('service_xd27jg9', 'template_jvynt3r', { to_email: userEmail, code: code });
+        return true;
+    } catch (e) {
+        alert("Ошибка почты: " + e.text);
+        return false;
+    }
+}
+
+// --- 4. АВТОРИЗАЦИЯ (КНОПКИ) ---
+
+function toggleAuth() {
+    isAuthReg = !isAuthReg;
+    document.getElementById('auth-title').innerText = isAuthReg ? "РЕГИСТРАЦИЯ" : "ВХОД";
+    document.getElementById('auth-nick').style.display = isAuthReg ? "block" : "none";
+    document.getElementById('auth-btn').innerText = isAuthReg ? "СОЗДАТЬ" : "ВОЙТИ";
+}
+
+async function handleAuth() {
+    const email = document.getElementById('auth-email').value;
+    const nickInput = document.getElementById('auth-nick').value;
+    const authBtn = document.getElementById('auth-btn');
+
+    if(!email.includes('@')) return alert("Введите правильный Email!");
+
+    if(isAuthReg) {
+        if(nickInput.length < 2) return alert("Ник слишком короткий!");
+        const snap = await database.ref('users/' + getEmailKey(email)).once('value');
+        if(snap.exists()) return alert("Этот Email уже занят!");
+
+        authBtn.innerText = "ОТПРАВКА КОДА...";
+        authBtn.disabled = true;
+        generatedCode = Math.floor(100000 + Math.random() * 900000).toString();
+        
+        if(await sendEmailCode(email, generatedCode)) {
+            const userCode = prompt("Код отправлен на " + email + "\nВведите код подтверждения:");
+            if(userCode === generatedCode) {
+                user = { ...user, email: email, nick: nickInput };
+                saveToCloud();
+                enterGame();
+            } else {
+                alert("Неверный код!");
+                authBtn.disabled = false;
+                authBtn.innerText = "СОЗДАТЬ";
+            }
+        }
+    } else {
+        const snap = await database.ref('users/' + getEmailKey(email)).once('value');
+        if(snap.exists()) {
+            user = snap.val();
+            enterGame();
+        } else {
+            alert("Пользователь не найден!");
+        }
+    }
+}
+
+function enterGame() {
+    document.getElementById('auth-overlay').style.display = 'none';
+    document.getElementById('main-nav').style.display = 'flex';
+    document.getElementById('main-content').style.display = 'flex';
+    updateUI();
+}
+
+// --- 5. ЛОГИКА ИГРЫ (ОБНОВЛЕНИЕ ИНТЕРФЕЙСА) ---
+
+function updateUI() {
+    saveToCloud();
+    document.getElementById('m-val').innerText = user.money.toLocaleString();
+    document.getElementById('nc-val').innerText = user.nc.toLocaleString();
+    const nEl = document.getElementById('main-nick');
+    nEl.innerText = user.nick;
+    nEl.className = user.currentColor || "";
+    document.getElementById('main-ava').innerText = user.ava;
+    document.getElementById('main-status').innerText = user.status;
+}
+
+// Переключение страниц
+function showPage(p, el) {
+    document.querySelectorAll('.page').forEach(pg=>pg.classList.remove('active'));
+    document.getElementById(p+'-page').classList.add('active');
+    document.querySelectorAll('.nav-item').forEach(i=>i.classList.remove('active'));
+    el.classList.add('active');
+}
+
+// Проверка сессии при запуске
+let session = localStorage.getItem('neonWinUser');
+if(session) {
+    user = JSON.parse(session);
+    enterGame();
+}
