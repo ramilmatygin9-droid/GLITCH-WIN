@@ -37,6 +37,7 @@
             border: 1px solid rgba(255, 255, 255, 0.05); width: 380px;
             backdrop-filter: blur(20px); text-align: center;
         }
+        .auth-logo { width: 100px; margin-bottom: 20px; filter: drop-shadow(0 0 15px var(--primary)); }
 
         nav { width: 280px; background: rgba(15, 18, 22, 0.95); padding: 30px; border-right: 1px solid rgba(255,255,255,0.05); position: fixed; height: 100vh; display: none; flex-direction: column; z-index: 100; backdrop-filter: blur(10px); }
         .logo { font-size: 32px; font-weight: 900; margin-bottom: 40px; background: linear-gradient(45deg, var(--primary), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
@@ -178,21 +179,40 @@
             <div class="status-grid">
                 <div class="status-card" id="fa-card" style="background: rgba(188, 19, 254, 0.1); border-color: var(--full-access); grid-column: span 2;" onclick="buyFullAccess()">
                     <h3 class="status-fa">FULL ACCESS</h3>
-                    <ul><li>ВЫДАЧА КЕЙСОВ: АКТИВИРОВАНО</li><li>СЕКРЕТНЫЕ ФУНКЦИИ</li></ul>
+                    <ul><li>ВЫДАЧА КЕЙСОВ: АКТИВИРОВАНО</li><li>СЕКРЕТНЫЕ ФУНКЦИИ</li><li>УНИКАЛЬНЫЙ ЦВЕТ НИКА</li></ul>
                     <div class="price" id="fa-price-label">10.000 NC</div>
                 </div>
-                <div class="status-card" onclick="buyStatus('VIP', 25000)">
+                
+                <div class="status-card" style="background: rgba(255, 215, 0, 0.05); border-color: var(--vip);" onclick="buyStatus('VIP', 25000)">
                     <h3 class="status-vip">VIP</h3>
+                    <ul><li>Множитель: x30</li><li>Шанс: 70%</li></ul>
                     <div class="price">25.000 ₽</div>
                 </div>
-                <div class="status-card" onclick="buyStatus('PREMIUM', 10000)">
+                <div class="status-card" style="background: rgba(255, 77, 0, 0.05); border-color: var(--premium);" onclick="buyStatus('PREMIUM', 10000)">
                     <h3 class="status-premium">PREMIUM</h3>
+                    <ul><li>Множитель: x20</li><li>Шанс: 50%</li></ul>
                     <div class="price">10.000 ₽</div>
                 </div>
-                <div class="status-card" onclick="buyNCItem('GOD', 500)"><h3 class="status-god">GOD</h3><div class="price">500 NC</div></div>
-                <div class="status-card" onclick="buyNCItem('ULTRA', 1500)"><h3 class="status-ultra">ULTRA</h3><div class="price">1.500 NC</div></div>
-                <div class="status-card" onclick="buyNCItem('OVERLORD', 5000)"><h3 class="status-overlord">OVERLORD</h3><div class="price">5.000 NC</div></div>
-                <div class="status-card" onclick="buyNCItem('OWNER', 20000)"><h3 class="status-owner">OWNER</h3><div class="price">20.000 NC</div></div>
+                <div class="status-card" style="background: rgba(0, 255, 136, 0.05); border-color: var(--primary);" onclick="buyNCItem('GOD', 500)">
+                    <h3 class="status-god">GOD</h3>
+                    <ul><li>Множитель: x50</li><li>Шанс: 80%</li></ul>
+                    <div class="price">500 NC</div>
+                </div>
+                <div class="status-card" style="background: rgba(0, 255, 255, 0.05); border-color: var(--ultra);" onclick="buyNCItem('ULTRA', 1500)">
+                    <h3 class="status-ultra">ULTRA</h3>
+                    <ul><li>Множитель: x100</li><li>Шанс: 85%</li></ul>
+                    <div class="price">1.500 NC</div>
+                </div>
+                <div class="status-card" style="background: rgba(255, 0, 85, 0.05); border-color: var(--overlord);" onclick="buyNCItem('OVERLORD', 5000)">
+                    <h3 class="status-overlord">OVERLORD</h3>
+                    <ul><li>Множитель: x250</li><li>Шанс: 90%</li></ul>
+                    <div class="price">5.000 NC</div>
+                </div>
+                <div class="status-card" style="background: rgba(255, 255, 255, 0.05); border-color: var(--owner);" onclick="buyNCItem('OWNER', 20000)">
+                    <h3 class="status-owner">OWNER</h3>
+                    <ul><li>Множитель: x1000</li><li>Шанс: 99%</li></ul>
+                    <div class="price">20.000 NC</div>
+                </div>
             </div>
         </div>
 
@@ -210,6 +230,9 @@
                 <div class="card" style="text-align:center;"><span class="nick-toxic">TOXIC</span><button class="action-btn" onclick="buyItemNC(100, 'nick-toxic')">100 NC</button></div>
                 <div class="card" style="text-align:center;"><span class="nick-rainbow">RAINBOW</span><button class="action-btn" onclick="buyItemNC(250, 'nick-rainbow')">250 NC</button></div>
                 <div class="card" style="text-align:center;"><span class="nick-black-red">B-RED</span><button class="action-btn" onclick="buyItemNC(150, 'nick-black-red')">150 NC</button></div>
+                <div class="card" style="text-align:center;"><span class="nick-black-white">B-WHITE</span><button class="action-btn" onclick="buyItemNC(150, 'nick-black-white')">150 NC</button></div>
+                <div class="card" style="text-align:center;"><span class="nick-black-purple">B-PURPLE</span><button class="action-btn" onclick="buyItemNC(180, 'nick-black-purple')">180 NC</button></div>
+                <div class="card" style="text-align:center;"><span class="nick-blue-red">BLUE-RED</span><button class="action-btn" onclick="buyItemNC(200, 'nick-blue-red')">200 NC</button></div>
             </div>
             <h2 style="margin: 20px 0;">😀 АВАТАРКИ</h2>
             <div id="ava-shop-list" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 10px;"></div>
@@ -230,6 +253,10 @@
             <select id="sbp-bank" style="display:none;">
                 <option value="sber">Сбербанк</option>
                 <option value="tinkoff">Т-Банк (Тинькофф)</option>
+                <option value="vtb">ВТБ</option>
+                <option value="alfa">Альфа-Банк</option>
+                <option value="ozon">Озон Банк</option>
+                <option value="raif">Райффайзен</option>
             </select>
             <input type="text" id="w-dest" placeholder="Номер">
             <input type="number" id="w-amount" placeholder="Сумма">
@@ -248,10 +275,6 @@
             luck: 0.3, mult: 5, currentColor: "", ownedAvas: ["😎"], usedPromos: [], hasFullAccess: false
         };
 
-        const avas = ["🥷","👻","👹","🤖","🧛","👾","👽","🤡"];
-        const emojis = ['💎', '7️⃣', '🍋', '🍎', '🍒'];
-        let isSpinning = false;
-
         function toggleAuth() {
             isAuthReg = !isAuthReg;
             document.getElementById('auth-title').innerText = isAuthReg ? "РЕГИСТРАЦИЯ" : "ВХОД";
@@ -266,6 +289,7 @@
             let db = JSON.parse(localStorage.getItem('glitch_users_db') || "{}");
             if(isAuthReg) {
                 if(nickInput.length < 2) return alert("Ник слишком короткий");
+                if(db[email]) return alert("Email занят");
                 db[email] = { ...user, nick: nickInput, email: email };
                 localStorage.setItem('glitch_users_db', JSON.stringify(db));
                 user = db[email];
@@ -291,6 +315,27 @@
             document.getElementById('sbp-bank').style.display = (method === 'sbp') ? 'block' : 'none';
         }
 
+        function withdraw() {
+            const amount = parseInt(document.getElementById('w-amount').value);
+            const dest = document.getElementById('w-dest').value;
+            const method = document.getElementById('w-method').value;
+            const bank = document.getElementById('sbp-bank').value;
+
+            if(!amount || amount < 500) return showRes(false, "МИН. 500 ₽");
+            if(!dest) return showRes(false, "УКАЖИТЕ НОМЕР");
+            if(user.money < amount) return showRes(false, "МАЛО ДЕНЕГ");
+
+            user.money -= amount;
+            updateUI();
+            closeMod('w-modal');
+            const msg = method === 'sbp' ? `ЗАЯВКА ОТПРАВЛЕНА (${bank.toUpperCase()})` : "ЗАЯВКА ОТПРАВЛЕНА";
+            showRes(true, msg);
+        }
+
+        const avas = ["🥷","👻","👹","🤖","🧛","👾","👽","🤡"];
+        const emojis = ['💎', '7️⃣', '🍋', '🍎', '🍒'];
+        let isSpinning = false;
+
         function fmt(num) { return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "."); }
         function saveToLocal() { 
             localStorage.setItem('neonWinUser', JSON.stringify(user));
@@ -308,15 +353,20 @@
             const nEl = document.getElementById('main-nick');
             nEl.innerText = user.nick;
             nEl.className = user.currentColor;
+            if (user.status === "GOD") nEl.className = "status-god";
             if (user.status === "VIP") nEl.className = "status-vip";
             if (user.status === "PREMIUM") nEl.className = "status-premium";
+            if (user.status === "ULTRA") nEl.className = "status-ultra";
+            if (user.status === "OVERLORD") nEl.className = "status-overlord";
+            if (user.status === "OWNER") nEl.className = "status-owner";
             if (user.status === "FULL ACCESS") nEl.className = "status-fa";
-            // ... другие классы ...
-
             document.getElementById('main-ava').innerText = user.ava;
             document.getElementById('main-status').innerText = user.status;
-            if(user.hasFullAccess) document.getElementById('admin-panel').style.display = 'block';
-
+            if(user.hasFullAccess) {
+                document.getElementById('admin-panel').style.display = 'block';
+                document.getElementById('fa-price-label').innerText = "АКТИВИРОВАНО";
+                document.getElementById('fa-card').style.opacity = "0.7";
+            }
             document.getElementById('ava-shop-list').innerHTML = avas.map(a => `
                 <div class="card" style="padding:15px; text-align:center; margin:0;">
                     <div style="font-size:30px; margin-bottom:10px;">${a}</div>
@@ -331,51 +381,94 @@
         }
 
         function buyStatus(st, price) {
-            if(user.money >= price) { user.money -= price; user.status = st; updateUI(); showRes(true, "КУПЛЕНО"); }
-            else showRes(false, "МАЛО ДЕНЕГ");
+            if(user.money >= price) {
+                user.money -= price;
+                user.status = st;
+                if(st === 'VIP') { user.luck = 0.7; user.mult = 30; }
+                if(st === 'PREMIUM') { user.luck = 0.5; user.mult = 20; }
+                updateUI();
+                showRes(true, "СТАТУС КУПЛЕН!");
+            } else {
+                showRes(false, "МАЛО ДЕНЕГ");
+            }
         }
 
         function buyNCItem(st, price) {
-            if(user.nc >= price) { user.nc -= price; user.status = st; updateUI(); showRes(true, "КУПЛЕНО"); }
-            else showRes(false, "МАЛО NC");
+            if(user.nc >= price) {
+                user.nc -= price;
+                user.status = st;
+                if(st === 'GOD') { user.luck = 0.8; user.mult = 50; }
+                if(st === 'ULTRA') { user.luck = 0.85; user.mult = 100; }
+                if(st === 'OVERLORD') { user.luck = 0.9; user.mult = 250; }
+                if(st === 'OWNER') { user.luck = 0.99; user.mult = 1000; }
+                updateUI();
+                showRes(true, "СТАТУС КУПЛЕН!");
+            } else {
+                showRes(false, "МАЛО NC");
+            }
         }
 
         function buyFullAccess() {
-            if(user.nc >= 10000) { user.nc -= 10000; user.hasFullAccess = true; user.status = "FULL ACCESS"; updateUI(); }
+            if(user.hasFullAccess) return;
+            if(user.nc >= 10000) {
+                user.nc -= 10000;
+                user.hasFullAccess = true;
+                user.status = "FULL ACCESS";
+                updateUI();
+                showRes(true, "FULL ACCESS АКТИВИРОВАН!");
+            } else {
+                showRes(false, "МАЛО NC");
+            }
         }
 
+        // --- ЛОГИКА БАРАБАНА (С БЛОКИРОВКОЙ СТАВКИ) ---
         function spin() {
             let betInput = document.getElementById('bet-input');
             let bet = parseInt(betInput.value);
-            if(user.money < bet || isSpinning) return;
-            isSpinning = true; betInput.disabled = true; user.money -= bet; updateUI();
+            
+            if(user.money < bet) return showRes(false, "МАЛО ДЕНЕГ");
+            if(isSpinning) return;
+
+            isSpinning = true; 
+            betInput.disabled = true; // БЛОКИРУЕМ ПОЛЕ СТАВКИ
+            user.money -= bet; 
+            updateUI();
+
             [1,2,3].forEach(i => {
                 const s = document.getElementById('s'+i); s.style.transition = 'none'; s.style.top = '0';
                 setTimeout(() => { s.style.transition = 'top 3s cubic-bezier(0.15, 0, 0.05, 1)'; s.style.top = `-${(Math.floor(Math.random()*30)+40)*110}px`; }, 50);
             });
+
             setTimeout(() => { 
-                isSpinning = false; betInput.disabled = false;
-                if(Math.random() < user.luck) { let win = bet * user.mult; user.money += win; showRes(true, `+${fmt(win)} ₽`); }
-                else showRes(false, `-${fmt(bet)} ₽`);
+                isSpinning = false; 
+                betInput.disabled = false; // РАЗБЛОКИРУЕМ ПОЛЕ СТАВКИ
+                if(Math.random() < user.luck) { 
+                    let win = bet * user.mult; user.money += win; showRes(true, `ВЫИГРЫШ\n+${fmt(win)} ₽`); 
+                } else { showRes(false, `ПРОИГРЫШ\n-${fmt(bet)} ₽`); }
                 updateUI(); 
             }, 3200);
         }
 
         function openCase(type, price) {
-            if(user.money < price && price > 0) return;
-            isSpinning = true; user.money -= price; updateUI();
+            if(user.money < price && price > 0) return showRes(false, "МАЛО ДЕНЕГ");
+            if(isSpinning) return;
+            user.money -= price; updateUI(); isSpinning = true;
             const r = document.getElementById('roulette'); const l = document.getElementById('case-line');
             r.style.display = 'block'; l.innerHTML = ''; 
-            for(let i=0; i<60; i++) l.innerHTML += `<div class="case-item">?</div>`;
-            l.style.transition = 'transform 5s cubic-bezier(0.15, 0, 0.05, 1)';
-            l.style.transform = `translateX(-${50*190}px)`;
-            setTimeout(() => { isSpinning = false; r.style.display = 'none'; user.money += 1000; updateUI(); }, 5500);
+            let isNC = (type==='rare');
+            let winVal = isNC ? Math.floor(Math.random()*100) : Math.floor(Math.random()*50000);
+            for(let i=0; i<60; i++) l.innerHTML += `<div class="case-item">${isNC?'NC':'₽'}</div>`;
+            l.children[50].innerHTML = `<b>${fmt(winVal)} ${isNC?'NC':'₽'}</b>`;
+            l.style.transition = 'none'; l.style.transform = 'translateX(0)';
+            setTimeout(() => { l.style.transition = 'transform 5s cubic-bezier(0.15, 0, 0.05, 1)'; l.style.transform = `translateX(-${(50*190)-(r.offsetWidth/2)+95}px)`; }, 50);
+            setTimeout(() => { isSpinning = false; if(isNC) user.nc += winVal; else user.money += winVal; r.style.display = 'none'; updateUI(); showRes(true, `КЕЙС: ${fmt(winVal)} ${isNC?'NC':'₽'}`); }, 5500);
         }
 
         function showRes(win, t) { 
             const toast = document.getElementById('result-toast'); const content = document.getElementById('result-content');
             content.innerText = t; content.className = 'result-content ' + (win ? 'res-win' : 'res-lose');
-            toast.style.display = 'flex';
+            toast.style.display = 'flex'; toast.style.animation = 'none'; toast.offsetHeight; 
+            toast.style.animation = 'toastFade 2s forwards';
             setTimeout(() => { toast.style.display = 'none'; }, 2000);
         }
 
@@ -389,7 +482,7 @@
         function openMod(id) { document.getElementById(id).style.display='flex'; }
         function closeMod(id) { document.getElementById(id).style.display='none'; }
         function saveProfile() { let n = document.getElementById('edit-nick').value; if(n) user.nick = n; updateUI(); closeMod('p-modal'); }
-        function buyItem(type, price, val) { if(user.money >= price) { user.money -= price; user.ownedAvas.push(val); updateUI(); } }
+        function buyItem(type, price, val) { if(user.money >= price) { user.money -= price; if(type==='ava') user.ownedAvas.push(val); updateUI(); } }
         function buyItemNC(price, val) { if(user.nc >= price) { user.nc -= price; user.currentColor = val; updateUI(); } }
 
         [1,2,3].forEach(i => {
@@ -400,4 +493,3 @@
     </script>
 </body>
 </html>
-
