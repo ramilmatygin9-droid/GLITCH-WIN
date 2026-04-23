@@ -2,162 +2,206 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bank Minimalist</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>T-Interface</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
-            --bg-color: #000000;
-            --card-bg: #121212;
-            --accent-color: #ffffff;
-            --text-main: #ffffff;
-            --text-secondary: #707070;
-            --button-bg: #1c1c1e;
+            --t-yellow: #ffdd2d;
+            --t-black: #000000;
+            --t-dark-grey: #1a1a1a;
+            --t-light-grey: #262626;
+            --text-white: #ffffff;
+            --text-muted: #929294;
         }
 
         body {
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--t-black);
+            color: var(--text-white);
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             margin: 0;
-            padding: 24px;
+            padding: 0;
+            -webkit-user-select: none;
+        }
+
+        /* Сториз */
+        .stories-container {
             display: flex;
-            flex-direction: column;
+            gap: 12px;
+            padding: 16px;
+            overflow-x: auto;
+            scrollbar-width: none;
+        }
+        .stories-container::-webkit-scrollbar { display: none; }
+
+        .story-circle {
+            min-width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            border: 2px solid var(--t-yellow);
+            padding: 2px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .story-inner {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: var(--t-light-grey);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
         }
 
-        .header {
-            margin-bottom: 40px;
-            margin-top: 20px;
+        /* Контент */
+        .main-content {
+            padding: 0 16px 100px 16px;
         }
 
-        .header h1 {
-            font-size: 28px;
+        .section-label {
+            font-size: 20px;
             font-weight: 700;
-            margin: 0;
+            margin: 20px 0 12px 0;
         }
 
-        .header p {
-            color: var(--text-secondary);
-            font-size: 16px;
-            margin: 8px 0 0 0;
-        }
-
-        /* Сетка управления */
-        .grid-container {
+        /* Плитки */
+        .grid-services {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 16px;
-            width: 100%;
+            gap: 12px;
         }
 
-        .grid-item {
-            background-color: var(--card-bg);
-            border-radius: 24px;
-            padding: 20px;
+        .t-card {
+            background-color: var(--t-dark-grey);
+            border-radius: 20px;
+            padding: 16px;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            aspect-ratio: 1 / 1;
-            transition: background-color 0.2s;
-            border: 1px solid #1f1f1f;
+            min-height: 100px;
         }
 
-        .grid-item:active {
-            background-color: #1f1f1f;
+        .t-card.full-width {
+            grid-column: span 2;
+            flex-direction: row;
+            align-items: center;
+            min-height: 60px;
         }
 
-        .item-icon {
-            font-size: 30px;
-            margin-bottom: 15px;
+        .card-icon {
+            font-size: 28px;
+            margin-bottom: 8px;
         }
 
-        .item-title {
-            font-size: 17px;
+        .card-title {
+            font-size: 15px;
             font-weight: 600;
-            line-height: 1.2;
         }
 
-        .item-desc {
-            font-size: 13px;
-            color: var(--text-secondary);
-            margin-top: 4px;
+        /* Нижнее меню */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background: rgba(26, 26, 26, 0.95);
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            border-top: 0.5px solid #333;
+            backdrop-filter: blur(10px);
         }
 
-        /* Нижняя кнопка */
-        .main-btn {
-            margin-top: 30px;
-            background-color: var(--accent-color);
-            color: black;
-            padding: 18px;
-            border-radius: 18px;
-            text-align: center;
-            font-weight: 700;
-            font-size: 16px;
-            cursor: pointer;
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            color: var(--text-muted);
+            font-size: 11px;
+            flex: 1;
         }
 
-        .main-btn:active {
-            opacity: 0.8;
+        .nav-item.active {
+            color: var(--t-yellow);
+        }
+
+        .nav-icon {
+            font-size: 20px;
         }
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <h1>Управление</h1>
-        <p>Выберите нужный раздел</p>
+    <div class="stories-container">
+        <div class="story-circle"><div class="story-inner">🌟</div></div>
+        <div class="story-circle"><div class="story-inner">🎮</div></div>
+        <div class="story-circle"><div class="story-inner">🍔</div></div>
+        <div class="story-circle"><div class="story-inner">🍿</div></div>
+        <div class="story-circle"><div class="story-inner">✈️</div></div>
     </div>
 
-    <div class="grid-container">
-        <div class="grid-item" onclick="sendData('my_cards')">
-            <div class="item-icon">💳</div>
-            <div>
-                <div class="item-title">Мои карты</div>
-                <div class="item-desc">Управление лимитами</div>
+    <div class="main-content">
+        <div class="section-label">Сервисы</div>
+        
+        <div class="grid-services">
+            <div class="t-card" onclick="tg.sendData('qr')">
+                <div class="card-icon">🔳</div>
+                <div class="card-title">Оплата по QR</div>
             </div>
-        </div>
-
-        <div class="grid-item" onclick="sendData('transfers')">
-            <div class="item-icon">🔄</div>
-            <div>
-                <div class="item-title">Переводы</div>
-                <div class="item-desc">По номеру или QR</div>
+            <div class="t-card" onclick="tg.sendData('transfer')">
+                <div class="card-icon">🔄</div>
+                <div class="card-title">Переводы</div>
             </div>
-        </div>
 
-        <div class="grid-item" onclick="sendData('settings')">
-            <div class="item-icon">⚙️</div>
-            <div>
-                <div class="item-title">Настройки</div>
-                <div class="item-desc">Безопасность</div>
+            <div class="t-card full-width" onclick="tg.sendData('market')">
+                <div class="card-title">Город • Кэшбэк до 30%</div>
+                <div style="font-size: 24px;">🛍️</div>
             </div>
-        </div>
 
-        <div class="grid-item" onclick="sendData('support')">
-            <div class="item-icon">💬</div>
-            <div>
-                <div class="item-title">Поддержка</div>
-                <div class="item-desc">Помощь 24/7</div>
+            <div class="t-card" onclick="tg.sendData('cards')">
+                <div class="card-icon">💳</div>
+                <div class="card-title">Мои карты</div>
+            </div>
+            <div class="t-card" onclick="tg.sendData('safe')">
+                <div class="card-icon">🔒</div>
+                <div class="card-title">Безопасность</div>
             </div>
         </div>
     </div>
 
-    <div class="main-btn" onclick="sendData('open_profile')">
-        Профиль пользователя
+    <div class="bottom-nav">
+        <div class="nav-item active">
+            <div class="nav-icon">🏠</div>
+            <span>Главная</span>
+        </div>
+        <div class="nav-item">
+            <div class="nav-icon">📊</div>
+            <span>Платежи</span>
+        </div>
+        <div class="nav-item">
+            <div class="nav-icon">⚙️</div>
+            <span>Настройки</span>
+        </div>
+        <div class="nav-item">
+            <div class="nav-icon">🎧</div>
+            <span>Поддержка</span>
+        </div>
     </div>
 
     <script>
         let tg = window.Telegram.WebApp;
         tg.expand();
-        tg.setHeaderColor('#000000');
+        tg.headerColor = '#000000';
+        tg.backgroundColor = '#000000';
 
-        function sendData(action) {
-            tg.sendData(JSON.stringify({
-                command: action,
-                timestamp: Date.now()
-            }));
-            tg.close(); // Закрыть WebApp после выбора (опционально)
-        }
+        // Вибрация при нажатии (как в настоящем приложении)
+        document.querySelectorAll('.t-card').forEach(item => {
+            item.addEventListener('click', () => {
+                tg.HapticFeedback.impactOccurred('light');
+            });
+        });
     </script>
 </body>
 </html>
