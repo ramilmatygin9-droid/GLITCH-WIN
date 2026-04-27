@@ -2,216 +2,112 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>T-Bank WebApp</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        :root {
-            --bg-color: #f2f3f7;
-            --card-white: #ffffff;
-            --t-blue: #327bed;
-            --text-black: #000000;
-            --text-grey: #6d6e71;
-            --nav-grey: #929397;
-        }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #121212; color: white; margin: 0; padding: 15px; }
+        .header { background: #1e1e1e; padding: 15px; border-radius: 15px; margin-bottom: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        .balance { font-size: 28px; font-weight: bold; color: #f1c40f; }
+        
+        .nav { display: flex; gap: 10px; margin-bottom: 15px; }
+        .nav button { flex: 1; padding: 10px; border-radius: 10px; border: none; background: #333; color: white; }
+        .nav button.active { background: #0088cc; }
 
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-black);
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-        }
+        .page { display: none; }
+        .active-page { display: block; }
 
-        /* Шапка */
-        .header {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 15px 20px;
-            background-color: var(--bg-color);
-            position: relative;
-        }
+        .click-btn { width: 150px; height: 150px; border-radius: 50%; border: 8px solid #0088cc; background: #1a1a1a; color: white; font-size: 20px; font-weight: bold; margin: 30px auto; cursor: pointer; display: block; box-shadow: 0 0 20px rgba(0,136,204,0.4); }
+        .click-btn:active { transform: scale(0.95); }
 
-        .header h1 {
-            font-size: 18px;
-            font-weight: 600;
-            margin: 0;
-        }
+        .shop-item { background: #1e1e1e; padding: 15px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .shop-item b { display: block; font-size: 16px; }
+        .buy-btn { background: #27ae60; color: white; border: none; padding: 8px 15px; border-radius: 8px; cursor: pointer; }
 
-        .gift-icon {
-            position: absolute;
-            right: 20px;
-            font-size: 22px;
-            color: var(--t-blue);
-        }
-
-        /* Карта */
-        .container {
-            padding: 10px 16px;
-        }
-
-        .account-card {
-            background-color: var(--card-white);
-            border-radius: 28px;
-            padding: 24px;
-            display: flex;
-            flex-direction: column;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.03);
-        }
-
-        .account-info {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            margin-bottom: 16px;
-        }
-
-        .bank-logo {
-            width: 48px;
-            height: 48px;
-            background-color: var(--t-blue);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 24px;
-            font-weight: bold;
-        }
-
-        .balance-block {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .amount {
-            font-size: 22px;
-            font-weight: 700;
-        }
-
-        .card-name {
-            font-size: 16px;
-            color: var(--text-grey);
-            margin-top: 2px;
-        }
-
-        /* Визуальные мини-карты */
-        .cards-preview {
-            display: flex;
-            gap: 8px;
-            margin-left: 63px;
-        }
-
-        .mini-card {
-            width: 55px;
-            height: 35px;
-            background: linear-gradient(135deg, #2b2b2b 0%, #000000 100%);
-            border-radius: 6px;
-            position: relative;
-            padding: 4px;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-end;
-        }
-
-        .mini-card::after {
-            content: "MIR";
-            color: rgba(255,255,255,0.5);
-            font-size: 6px;
-            font-weight: bold;
-            text-align: right;
-        }
-
-        /* Нижнее меню */
-        .bottom-nav {
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-            background-color: #ffffff;
-            display: flex;
-            justify-content: space-around;
-            padding: 10px 0 25px 0;
-            border-top: 1px solid #e0e0e0;
-        }
-
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 4px;
-            color: var(--nav-grey);
-            font-size: 10px;
-            flex: 1;
-        }
-
-        .nav-item.active {
-            color: var(--t-blue);
-        }
-
-        .nav-icon {
-            font-size: 22px;
-        }
+        .promo-section { margin-top: 20px; padding: 15px; background: #1e1e1e; border-radius: 12px; }
+        input { width: 80%; padding: 10px; border-radius: 8px; border: none; background: #333; color: white; margin-bottom: 10px; }
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <h1>Главная</h1>
-        <div class="gift-icon">🎁</div>
+<div class="header">
+    <div style="font-size: 14px; color: #aaa;">Твой баланс:</div>
+    <div class="balance" id="balance">0 💰</div>
+</div>
+
+<div class="nav">
+    <button id="btn-main" class="active" onclick="showPage('main')">Игра</button>
+    <button id="btn-shop" onclick="showPage('shop')">Магазин</button>
+</div>
+
+<div id="main" class="page active-page">
+    <button class="click-btn" onclick="clickAction()">КЛИК!</button>
+    <div class="promo-section">
+        <input type="text" id="promoCode" placeholder="Введи промокод...">
+        <button class="buy-btn" style="width: 100%;" onclick="activatePromo()">Активировать</button>
     </div>
+</div>
 
-    <div class="container">
-        <div class="account-card" onclick="handleCardClick()">
-            <div class="account-info">
-                <div class="bank-logo">₽</div>
-                <div class="balance-block">
-                    <div class="amount">0 ₽</div>
-                    <div class="card-name">Black</div>
-                </div>
-            </div>
-            <div class="cards-preview">
-                <div class="mini-card"></div>
-                <div class="mini-card" style="background: linear-gradient(135deg, #444 0%, #222 100%);"></div>
-            </div>
+<div id="shop" class="page">
+    <div class="shop-item">
+        <div>
+            <b>Медный клик</b>
+            <small>+2 за клик</small>
         </div>
+        <button class="buy-btn" onclick="buy(100, 2)">100 💰</button>
     </div>
-
-    <div class="bottom-nav">
-        <div class="nav-item active">
-            <div class="nav-icon">🟦</div>
-            <span>Главная</span>
+    <div class="shop-item">
+        <div>
+            <b>Золотой бур</b>
+            <small>+10 за клик</small>
         </div>
-        <div class="nav-item">
-            <div class="nav-icon">🔘</div>
-            <span>Платежи</span>
-        </div>
-        <div class="nav-item">
-            <div class="nav-icon">💠</div>
-            <span>Город</span>
-        </div>
-        <div class="nav-item">
-            <div class="nav-icon">💬</div>
-            <span>Чат</span>
-        </div>
-        <div class="nav-item">
-            <div class="nav-icon">📁</div>
-            <span>Витрина</span>
-        </div>
+        <button class="buy-btn" onclick="buy(500, 10)">500 💰</button>
     </div>
+</div>
 
-    <script>
-        let tg = window.Telegram.WebApp;
-        tg.expand();
-        tg.setHeaderColor('#f2f3f7');
+<script>
+    let tg = window.Telegram.WebApp;
+    let balance = 0;
+    let power = 1;
+    tg.expand();
 
-        function handleCardClick() {
-            tg.HapticFeedback.impactOccurred('medium');
-            // Здесь можно добавить переход в детали карты
+    function showPage(pageId) {
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active-page'));
+        document.querySelectorAll('.nav button').forEach(b => b.classList.remove('active'));
+        document.getElementById(pageId).classList.add('active-page');
+        document.getElementById('btn-' + (pageId === 'main' ? 'main' : 'shop')).classList.add('active');
+    }
+
+    function updateUI() {
+        document.getElementById('balance').innerText = balance.toFixed(0) + " 💰";
+    }
+
+    function clickAction() {
+        balance += power;
+        updateUI();
+        tg.HapticFeedback.impactOccurred('medium'); // Вибрация при клике!
+    }
+
+    function buy(price, addPower) {
+        if (balance >= price) {
+            balance -= price;
+            power += addPower;
+            updateUI();
+            alert("Успешно куплено! Сила: " + power);
+        } else {
+            alert("Мало монет!");
         }
-    </script>
+    }
+
+    function activatePromo() {
+        let code = document.getElementById('promoCode').value.toLowerCase();
+        if (code === 'carrot' || code === 'admin') {
+            balance += 1000;
+            updateUI();
+            alert("Промокод принят! +1000 💰");
+        } else {
+            alert("Код не найден");
+        }
+    }
+</script>
 </body>
 </html>
