@@ -5,126 +5,129 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        /* Чистый белый дизайн */
-        body { font-family: 'Segoe UI', sans-serif; background: #ffffff; color: #333; margin: 0; padding: 15px; overflow-x: hidden; }
-        .header { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 2px solid #f0f0f0; margin-bottom: 20px; }
-        .balance { font-size: 22px; font-weight: bold; color: #27ae60; }
+        body { font-family: 'Arial', sans-serif; background: #ffffff; color: #333; margin: 0; padding: 0; text-align: center; }
+        
+        /* Хедер с балансом */
+        .top-bar { padding: 20px; border-bottom: 1px solid #eee; font-size: 24px; font-weight: bold; color: #27ae60; }
 
-        /* Рулетка */
-        .roulette-container { position: relative; width: 100%; height: 120px; border: 2px solid #333; border-radius: 10px; overflow: hidden; background: #fafafa; margin-bottom: 20px; }
-        .pointer { position: absolute; top: 0; left: 50%; width: 4px; height: 100%; background: red; z-index: 10; transform: translateX(-50%); }
-        .tape { display: flex; position: absolute; left: 0; top: 0; height: 100%; transition: transform 4s cubic-bezier(0.15, 0, 0.15, 1); }
-        .item { min-width: 100px; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; border-right: 1px solid #eee; font-weight: bold; font-size: 14px; }
+        /* Контейнер колеса */
+        .wheel-box { position: relative; width: 300px; height: 300px; margin: 40px auto; }
+        #wheel { width: 100%; height: 100%; border-radius: 50%; border: 5px solid #333; transition: transform 5s cubic-bezier(0.1, 0, 0.2, 1); background: conic-gradient(
+            #f1c40f 0deg 72deg, #9b59b6 72deg 144deg, #3498db 144deg 216deg, #e74c3c 216deg 288deg, #2ecc71 288deg 360deg
+        ); }
+        .arrow { position: absolute; top: -20px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 15px solid transparent; border-right: 15px solid transparent; border-top: 30px solid #333; z-index: 10; }
 
-        /* Редкость */
-        .common { background: #dcdde1; } /* Обычный */
-        .rare { background: #3498db; color: white; } /* Редкий */
-        .epic { background: #9b59b6; color: white; } /* Эпик */
-        .legendary { background: #f1c40f; color: black; } /* Легендарка (Джекпот) */
+        /* Меню кейсов */
+        .case-card { margin: 15px; padding: 20px; border: 2px solid #eee; border-radius: 15px; display: flex; justify-content: space-between; align-items: center; }
+        .case-info b { font-size: 18px; }
+        .open-btn { background: #333; color: white; border: none; padding: 10px 20px; border-radius: 10px; cursor: pointer; }
 
-        /* Кнопки и Инвентарь */
-        .btn { background: #333; color: white; border: none; padding: 15px; width: 100%; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; margin-bottom: 10px; }
-        .btn:disabled { background: #ccc; }
-        .inventory { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 20px; }
-        .inv-item { padding: 10px; border: 1px solid #ddd; border-radius: 8px; text-align: center; font-size: 12px; }
+        /* Навигация */
+        .nav { position: fixed; bottom: 0; width: 100%; display: flex; background: #fff; border-top: 1px solid #eee; }
+        .nav-item { flex: 1; padding: 15px; cursor: pointer; font-weight: bold; }
+        .nav-item.active { border-top: 3px solid #000; background: #f9f9f9; }
+
+        .hidden { display: none; }
     </style>
 </head>
 <body>
 
-<div class="header">
-    <span>Мой кошелек:</span>
-    <div class="balance" id="balance">5000 💰</div>
+<div class="top-bar" id="balance">5000 💰</div>
+
+<div id="roulette-page" class="hidden">
+    <div class="wheel-box">
+        <div class="arrow"></div>
+        <div id="wheel"></div>
+    </div>
+    <h2 id="win-text">Нажми "Крутить"</h2>
+    <button class="open-btn" id="spin-btn" onclick="spinWheel()">КРУТИТЬ ЗА 500</button>
+    <br><br>
+    <button onclick="goBack()" style="border:none; background:none; color: gray;">← Назад к кейсам</button>
 </div>
 
-<div class="roulette-container">
-    <div class="pointer"></div>
-    <div id="tape" class="tape"></div>
+<div id="cases-page">
+    <div class="case-card">
+        <div class="case-info">
+            <b>Валютный кейс</b><br>
+            <small>От 100 до 50 000 💰</small>
+        </div>
+        <button class="open-btn" onclick="openCaseMenu()">Открыть</button>
+    </div>
 </div>
 
-<button id="openBtn" class="btn" onclick="startSpin()">ОТКРЫТЬ КЕЙС (500 💰)</button>
+<div id="inventory-page" class="hidden" style="padding: 20px;">
+    <h3>Ваш инвентарь пуст</h3>
+</div>
 
-<h3 style="margin-top: 30px;">Твой Инвентарь</h3>
-<div class="inventory" id="inventory"></div>
+<div class="nav">
+    <div class="nav-item active" onclick="switchTab('cases')">Кейсы</div>
+    <div class="nav-item" onclick="switchTab('inventory')">Инвентарь</div>
+</div>
 
 <script>
     let tg = window.Telegram.WebApp;
     let balance = 5000;
+    let currentRotation = 0;
     let isSpinning = false;
-    const tape = document.getElementById('tape');
-    const invDiv = document.getElementById('inventory');
 
-    // Настройка шансов и наград
     const prizes = [
-        { name: "50 💰", val: 50, color: "common", weight: 60 },
-        { name: "200 💰", val: 200, color: "common", weight: 25 },
-        { name: "1000 💰", val: 1000, color: "rare", weight: 10 },
-        { name: "5000 💰", val: 5000, color: "epic", weight: 4 },
-        { name: "25000 💰", val: 25000, color: "legendary", weight: 1 }
+        { name: "50 000 💰", color: "legendary", deg: 36 }, // 0-72
+        { name: "100 💰", color: "common", deg: 108 },     // 72-144
+        { name: "500 💰", color: "rare", deg: 180 },       // 144-216
+        { name: "5 000 💰", color: "epic", deg: 252 },     // 216-288
+        { name: "1 000 💰", color: "rare", deg: 324 }      // 288-360
     ];
 
-    function getRandomPrize() {
-        let totalWeight = prizes.reduce((sum, p) => sum + p.weight, 0);
-        let random = Math.random() * totalWeight;
-        for (let p of prizes) {
-            if (random < p.weight) return p;
-            random -= p.weight;
-        }
+    function switchTab(tab) {
+        document.getElementById('cases-page').classList.toggle('hidden', tab !== 'cases');
+        document.getElementById('inventory-page').classList.toggle('hidden', tab !== 'inventory');
+        document.getElementById('roulette-page').classList.add('hidden');
+        document.querySelectorAll('.nav-item').forEach(el => el.classList.toggle('active', el.innerText.toLowerCase() === (tab === 'cases' ? 'кейсы' : 'инвентарь')));
     }
 
-    function startSpin() {
+    function openCaseMenu() {
+        document.getElementById('cases-page').classList.add('hidden');
+        document.getElementById('roulette-page').classList.remove('hidden');
+    }
+
+    function goBack() {
+        if (isSpinning) return;
+        switchTab('cases');
+    }
+
+    function spinWheel() {
         if (isSpinning || balance < 500) return;
 
         balance -= 500;
-        updateUI();
+        updateBalance();
         isSpinning = true;
-        document.getElementById('openBtn').disabled = true;
+        document.getElementById('spin-btn').disabled = true;
 
-        // Генерируем 50 элементов для рулетки
-        tape.innerHTML = '';
-        tape.style.transition = 'none';
-        tape.style.transform = 'translateX(0)';
+        // Случайный приз
+        const prizeIndex = Math.floor(Math.random() * prizes.length);
+        const prize = prizes[prizeIndex];
+        
+        // Расчет вращения (не менее 5 полных оборотов + угол приза)
+        const extraDegrees = (360 * 5) + (360 - prize.deg);
+        currentRotation += extraDegrees;
 
-        let spinItems = [];
-        for (let i = 0; i < 60; i++) {
-            spinItems.push(getRandomPrize());
-        }
+        const wheel = document.getElementById('wheel');
+        wheel.style.transform = `rotate(${currentRotation}deg)`;
 
-        spinItems.forEach(p => {
-            const div = document.createElement('div');
-            div.className = `item ${p.color}`;
-            div.innerHTML = `<span>${p.name}</span>`;
-            tape.appendChild(div);
-        });
-
-        // Запуск анимации
         setTimeout(() => {
-            const itemWidth = 100;
-            const targetIndex = 55; // На каком элементе остановимся
-            const offset = (targetIndex * itemWidth) - (window.innerWidth / 2) + (itemWidth / 2);
+            isSpinning = false;
+            document.getElementById('spin-btn').disabled = false;
+            document.getElementById('win-text').innerText = "Выпало: " + prize.name;
             
-            tape.style.transition = 'transform 4s cubic-bezier(0.15, 0, 0.15, 1)';
-            tape.style.transform = `translateX(-${offset}px)`;
-
-            setTimeout(() => {
-                const win = spinItems[targetIndex];
-                balance += win.val;
-                addToInventory(win);
-                updateUI();
-                isSpinning = false;
-                document.getElementById('openBtn').disabled = false;
-                tg.HapticFeedback.notificationOccurred('success');
-            }, 4100);
-        }, 50);
+            // Начисление (упрощенно)
+            let winVal = parseInt(prize.name.replace(/\s/g, ''));
+            balance += winVal;
+            updateBalance();
+            tg.HapticFeedback.notificationOccurred('success');
+        }, 5000);
     }
 
-    function addToInventory(item) {
-        const div = document.createElement('div');
-        div.className = `inv-item ${item.color}`;
-        div.innerText = item.name;
-        invDiv.prepend(div);
-    }
-
-    function updateUI() {
+    function updateBalance() {
         document.getElementById('balance').innerText = balance + " 💰";
     }
 
