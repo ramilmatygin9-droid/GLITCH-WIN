@@ -5,109 +5,131 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #121212; color: white; margin: 0; padding: 15px; }
-        .header { background: #1e1e1e; padding: 15px; border-radius: 15px; margin-bottom: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
-        .balance { font-size: 28px; font-weight: bold; color: #f1c40f; }
-        
-        .nav { display: flex; gap: 10px; margin-bottom: 15px; }
-        .nav button { flex: 1; padding: 10px; border-radius: 10px; border: none; background: #333; color: white; }
-        .nav button.active { background: #0088cc; }
+        /* Чистый белый дизайн */
+        body { font-family: 'Segoe UI', sans-serif; background: #ffffff; color: #333; margin: 0; padding: 15px; overflow-x: hidden; }
+        .header { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 2px solid #f0f0f0; margin-bottom: 20px; }
+        .balance { font-size: 22px; font-weight: bold; color: #27ae60; }
 
-        .page { display: none; }
-        .active-page { display: block; }
+        /* Рулетка */
+        .roulette-container { position: relative; width: 100%; height: 120px; border: 2px solid #333; border-radius: 10px; overflow: hidden; background: #fafafa; margin-bottom: 20px; }
+        .pointer { position: absolute; top: 0; left: 50%; width: 4px; height: 100%; background: red; z-index: 10; transform: translateX(-50%); }
+        .tape { display: flex; position: absolute; left: 0; top: 0; height: 100%; transition: transform 4s cubic-bezier(0.15, 0, 0.15, 1); }
+        .item { min-width: 100px; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; border-right: 1px solid #eee; font-weight: bold; font-size: 14px; }
 
-        .click-btn { width: 150px; height: 150px; border-radius: 50%; border: 8px solid #0088cc; background: #1a1a1a; color: white; font-size: 20px; font-weight: bold; margin: 30px auto; cursor: pointer; display: block; box-shadow: 0 0 20px rgba(0,136,204,0.4); }
-        .click-btn:active { transform: scale(0.95); }
+        /* Редкость */
+        .common { background: #dcdde1; } /* Обычный */
+        .rare { background: #3498db; color: white; } /* Редкий */
+        .epic { background: #9b59b6; color: white; } /* Эпик */
+        .legendary { background: #f1c40f; color: black; } /* Легендарка (Джекпот) */
 
-        .shop-item { background: #1e1e1e; padding: 15px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-        .shop-item b { display: block; font-size: 16px; }
-        .buy-btn { background: #27ae60; color: white; border: none; padding: 8px 15px; border-radius: 8px; cursor: pointer; }
-
-        .promo-section { margin-top: 20px; padding: 15px; background: #1e1e1e; border-radius: 12px; }
-        input { width: 80%; padding: 10px; border-radius: 8px; border: none; background: #333; color: white; margin-bottom: 10px; }
+        /* Кнопки и Инвентарь */
+        .btn { background: #333; color: white; border: none; padding: 15px; width: 100%; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; margin-bottom: 10px; }
+        .btn:disabled { background: #ccc; }
+        .inventory { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 20px; }
+        .inv-item { padding: 10px; border: 1px solid #ddd; border-radius: 8px; text-align: center; font-size: 12px; }
     </style>
 </head>
 <body>
 
 <div class="header">
-    <div style="font-size: 14px; color: #aaa;">Твой баланс:</div>
-    <div class="balance" id="balance">0 💰</div>
+    <span>Мой кошелек:</span>
+    <div class="balance" id="balance">5000 💰</div>
 </div>
 
-<div class="nav">
-    <button id="btn-main" class="active" onclick="showPage('main')">Игра</button>
-    <button id="btn-shop" onclick="showPage('shop')">Магазин</button>
+<div class="roulette-container">
+    <div class="pointer"></div>
+    <div id="tape" class="tape"></div>
 </div>
 
-<div id="main" class="page active-page">
-    <button class="click-btn" onclick="clickAction()">КЛИК!</button>
-    <div class="promo-section">
-        <input type="text" id="promoCode" placeholder="Введи промокод...">
-        <button class="buy-btn" style="width: 100%;" onclick="activatePromo()">Активировать</button>
-    </div>
-</div>
+<button id="openBtn" class="btn" onclick="startSpin()">ОТКРЫТЬ КЕЙС (500 💰)</button>
 
-<div id="shop" class="page">
-    <div class="shop-item">
-        <div>
-            <b>Медный клик</b>
-            <small>+2 за клик</small>
-        </div>
-        <button class="buy-btn" onclick="buy(100, 2)">100 💰</button>
-    </div>
-    <div class="shop-item">
-        <div>
-            <b>Золотой бур</b>
-            <small>+10 за клик</small>
-        </div>
-        <button class="buy-btn" onclick="buy(500, 10)">500 💰</button>
-    </div>
-</div>
+<h3 style="margin-top: 30px;">Твой Инвентарь</h3>
+<div class="inventory" id="inventory"></div>
 
 <script>
     let tg = window.Telegram.WebApp;
-    let balance = 0;
-    let power = 1;
-    tg.expand();
+    let balance = 5000;
+    let isSpinning = false;
+    const tape = document.getElementById('tape');
+    const invDiv = document.getElementById('inventory');
 
-    function showPage(pageId) {
-        document.querySelectorAll('.page').forEach(p => p.classList.remove('active-page'));
-        document.querySelectorAll('.nav button').forEach(b => b.classList.remove('active'));
-        document.getElementById(pageId).classList.add('active-page');
-        document.getElementById('btn-' + (pageId === 'main' ? 'main' : 'shop')).classList.add('active');
+    // Настройка шансов и наград
+    const prizes = [
+        { name: "50 💰", val: 50, color: "common", weight: 60 },
+        { name: "200 💰", val: 200, color: "common", weight: 25 },
+        { name: "1000 💰", val: 1000, color: "rare", weight: 10 },
+        { name: "5000 💰", val: 5000, color: "epic", weight: 4 },
+        { name: "25000 💰", val: 25000, color: "legendary", weight: 1 }
+    ];
+
+    function getRandomPrize() {
+        let totalWeight = prizes.reduce((sum, p) => sum + p.weight, 0);
+        let random = Math.random() * totalWeight;
+        for (let p of prizes) {
+            if (random < p.weight) return p;
+            random -= p.weight;
+        }
+    }
+
+    function startSpin() {
+        if (isSpinning || balance < 500) return;
+
+        balance -= 500;
+        updateUI();
+        isSpinning = true;
+        document.getElementById('openBtn').disabled = true;
+
+        // Генерируем 50 элементов для рулетки
+        tape.innerHTML = '';
+        tape.style.transition = 'none';
+        tape.style.transform = 'translateX(0)';
+
+        let spinItems = [];
+        for (let i = 0; i < 60; i++) {
+            spinItems.push(getRandomPrize());
+        }
+
+        spinItems.forEach(p => {
+            const div = document.createElement('div');
+            div.className = `item ${p.color}`;
+            div.innerHTML = `<span>${p.name}</span>`;
+            tape.appendChild(div);
+        });
+
+        // Запуск анимации
+        setTimeout(() => {
+            const itemWidth = 100;
+            const targetIndex = 55; // На каком элементе остановимся
+            const offset = (targetIndex * itemWidth) - (window.innerWidth / 2) + (itemWidth / 2);
+            
+            tape.style.transition = 'transform 4s cubic-bezier(0.15, 0, 0.15, 1)';
+            tape.style.transform = `translateX(-${offset}px)`;
+
+            setTimeout(() => {
+                const win = spinItems[targetIndex];
+                balance += win.val;
+                addToInventory(win);
+                updateUI();
+                isSpinning = false;
+                document.getElementById('openBtn').disabled = false;
+                tg.HapticFeedback.notificationOccurred('success');
+            }, 4100);
+        }, 50);
+    }
+
+    function addToInventory(item) {
+        const div = document.createElement('div');
+        div.className = `inv-item ${item.color}`;
+        div.innerText = item.name;
+        invDiv.prepend(div);
     }
 
     function updateUI() {
-        document.getElementById('balance').innerText = balance.toFixed(0) + " 💰";
+        document.getElementById('balance').innerText = balance + " 💰";
     }
 
-    function clickAction() {
-        balance += power;
-        updateUI();
-        tg.HapticFeedback.impactOccurred('medium'); // Вибрация при клике!
-    }
-
-    function buy(price, addPower) {
-        if (balance >= price) {
-            balance -= price;
-            power += addPower;
-            updateUI();
-            alert("Успешно куплено! Сила: " + power);
-        } else {
-            alert("Мало монет!");
-        }
-    }
-
-    function activatePromo() {
-        let code = document.getElementById('promoCode').value.toLowerCase();
-        if (code === 'carrot' || code === 'admin') {
-            balance += 1000;
-            updateUI();
-            alert("Промокод принят! +1000 💰");
-        } else {
-            alert("Код не найден");
-        }
-    }
+    tg.expand();
 </script>
+
 </body>
 </html>
