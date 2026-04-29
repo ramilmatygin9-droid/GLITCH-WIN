@@ -1,50 +1,76 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Carrot Kombat Web</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body { font-family: sans-serif; background: #1a1a1a; color: white; text-align: center; }
-        .game-card { border: 2px solid #444; border-radius: 15px; padding: 20px; margin: 10px; }
-        button { background: #0088cc; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; }
-        #balance { font-weight: bold; color: #00ff00; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #1a1a1a; color: white; text-align: center; margin: 0; padding: 20px; }
+        .balance-card { background: #2a2a2a; border-radius: 15px; padding: 20px; margin-bottom: 20px; border: 1px solid #444; }
+        .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 20px; }
+        .btn { background: #3a3a3a; border: none; border-radius: 10px; padding: 15px; color: white; cursor: pointer; transition: 0.2s; font-size: 1.2em; }
+        .btn:active { transform: scale(0.95); background: #555; }
+        .play-btn { background: #0088cc; grid-column: span 3; font-weight: bold; margin-top: 10px; }
+        #status { margin-top: 20px; font-size: 0.9em; color: #aaa; }
+        .win { color: #00ff00; font-weight: bold; }
+        .lose { color: #ff4444; font-weight: bold; }
     </style>
 </head>
 <body>
-    <h1>🥕 Carrot Kombat Web</h1>
-    <div class="game-card">
-        <p>Ваш баланс: <span id="balance">Загрузка...</span> m¢</p>
-        <button onclick="playGame()">Испытать удачу (10 m¢)</button>
+    <div class="balance-card">
+        <div>💰 Баланс: <span id="balance">1000</span> m¢</div>
+        <div style="font-size: 0.8em; color: #888; margin-top: 5px;">💸 Ставка: <span id="bet">10</span> m¢</div>
     </div>
+
+    <h3>🎮 Выбери игру</h3>
+    <div class="grid">
+        <button class="btn" onclick="play('slots')">🎰</button>
+        <button class="btn" onclick="play('dice')">🎲</button>
+        <button class="btn" onclick="play('bask')">🏀</button>
+        <button class="btn" onclick="play('foot')">⚽</button>
+        <button class="btn" onclick="play('dart')">🎯</button>
+        <button class="btn" onclick="play('bowl')"> bowling </button>
+    </div>
+
+    <div id="status">Нажми на иконку, чтобы сыграть</div>
 
     <script>
         const tg = window.Telegram.WebApp;
-        tg.expand(); // Расширить на весь экран
+        tg.expand();
 
-        // Имитация получения данных (в реальном проекте тут будет Fetch к API)
         let balance = 1000;
-        document.getElementById('balance').innerText = balance;
+        let bet = 10;
 
-        function playGame() {
-            if (balance >= 10) {
-                balance -= 10;
-                const win = Math.random() > 0.5;
+        function play(game) {
+            if (balance < bet) {
+                alert("Недостаточно средств!");
+                return;
+            }
+
+            balance -= bet;
+            document.getElementById('status').innerText = "Крутим...";
+            
+            // Имитация задержки как в боте
+            setTimeout(() => {
+                const win = Math.random() > 0.6; // Шанс 40%
+                let multiplier = 2;
+                
                 if (win) {
-                    const prize = 20;
-                    balance += prize;
-                    alert("Вы выиграли " + prize + " m¢!");
+                    let winAmount = bet * multiplier;
+                    balance += winAmount;
+                    document.getElementById('status').innerHTML = `<span class="win">✅ ПОБЕДА! +${winAmount} m¢</span>`;
                 } else {
-                    alert("Проигрыш!");
+                    document.getElementById('status').innerHTML = `<span class="lose">❌ ПРОИГРЫШ! -${bet} m¢</span>`;
                 }
+                
                 document.getElementById('balance').innerText = balance;
                 
-                // Отправляем данные обратно в бот (если нужно закрыть WebApp)
-                // tg.sendData(JSON.stringify({new_balance: balance}));
-            } else {
-                alert("Недостаточно средств!");
-            }
+                // Отправка данных боту при закрытии (опционально)
+                tg.MainButton.setText("ЗАКРЫТЬ ИГРУ").show().onClick(() => {
+                    tg.close();
+                });
+            }, 1000);
         }
     </script>
 </body>
