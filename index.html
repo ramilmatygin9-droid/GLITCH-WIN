@@ -4,12 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ultimate Case Opener</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
             --bg: #0b0c0f;
             --card: #161920;
             --accent: #ffcc00;
             --win: #00ff88;
+            --lose: #ff4444;
             --border: #2a2e38;
         }
 
@@ -22,28 +24,44 @@
             align-items: center;
             margin: 0;
             padding: 20px;
-            overflow-x: hidden;
+            overflow: hidden;
+            height: 100vh;
         }
 
-        /* Баланс */
+        /* GUI Уведомление */
+        #result-popup {
+            display: none;
+            position: fixed;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--card);
+            border: 2px solid var(--accent);
+            padding: 20px 40px;
+            border-radius: 20px;
+            text-align: center;
+            z-index: 1000;
+            box-shadow: 0 0 30px rgba(0,0,0,0.8);
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translate(-50%, -60%); } to { opacity: 1; transform: translate(-50%, -50%); } }
+
         .balance-card {
             background: var(--card);
-            padding: 15px 30px;
+            padding: 10px 25px;
             border-radius: 50px;
             border: 1px solid var(--border);
-            font-size: 22px;
+            font-size: 20px;
             font-weight: bold;
-            margin-bottom: 40px;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.4);
+            margin-bottom: 30px;
         }
         .balance-card span { color: var(--accent); }
 
-        /* ЛЕНТОЧНАЯ РУЛЕТКА */
         .roulette-wrapper {
             position: relative;
             width: 100%;
-            max-width: 500px;
-            height: 130px;
+            max-width: 400px;
+            height: 110px;
             background: var(--card);
             border: 2px solid var(--border);
             border-radius: 15px;
@@ -52,12 +70,10 @@
             align-items: center;
         }
 
-        /* Линия-указатель */
         .pointer {
             position: absolute;
             left: 50%;
-            top: 0;
-            bottom: 0;
+            top: 0; bottom: 0;
             width: 4px;
             background: var(--accent);
             z-index: 10;
@@ -72,8 +88,8 @@
         }
 
         .item {
-            min-width: 100px;
-            height: 100px;
+            min-width: 90px;
+            height: 90px;
             margin: 0 5px;
             background: #20242d;
             border-radius: 10px;
@@ -85,35 +101,20 @@
             border-bottom: 4px solid #333;
         }
 
-        /* КЕЙС */
-        .case-area {
-            margin-top: 50px;
-            text-align: center;
-        }
+        .case-area { margin-top: 40px; text-align: center; }
 
         .case-box {
-            width: 180px;
-            height: 120px;
+            width: 160px; height: 100px;
             background: linear-gradient(135deg, #2a2e38, #161920);
             border: 2px solid var(--accent);
             border-radius: 15px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: 0.3s;
-            position: relative;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: bold; cursor: pointer; transition: 0.3s;
         }
 
-        .case-box:hover { transform: scale(1.05); box-shadow: 0 0 20px rgba(255,204,0,0.2); }
-
-        /* Анимация открытия */
         .opening { animation: openEffect 0.6s forwards; }
 
         @keyframes openEffect {
-            0% { transform: scale(1); filter: brightness(1); }
             50% { transform: scale(1.2) rotate(5deg); filter: brightness(2); }
             100% { transform: scale(0); opacity: 0; }
         }
@@ -126,16 +127,18 @@
             border-radius: 10px;
             font-weight: bold;
             cursor: pointer;
-            text-transform: uppercase;
         }
-
-        .btn-spin:disabled { background: #444; cursor: not-allowed; }
-
+        .btn-spin:disabled { background: #444; }
     </style>
 </head>
 <body>
 
-    <div class="balance-card">Баланс: <span id="balance">1000</span> m¢</div>
+    <div id="result-popup">
+        <h2 id="result-title"></h2>
+        <p id="result-text" style="font-size: 24px; font-weight: bold;"></p>
+    </div>
+
+    <div class="balance-card">Баланс: <span id="balance">Загрузка...</span> m¢</div>
 
     <div class="roulette-wrapper">
         <div class="pointer"></div>
@@ -148,56 +151,91 @@
     </div>
 
     <script>
-        let balance = 1000;
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+
+        let balance = 1000; 
         let isSpinning = false;
         const tape = document.getElementById('tape');
-        
-        // Набор предметов для ленты (валюта от 10 до 100)
-        const possiblePrizes = [10, 15, 20, 25, 30, 40, 50, 60, 70, 80, 90, 100];
+        const possiblePrizes = [10, 20, 30, 50, 100, 150, 250, 500];
+
+        // Синхронизация с темой ТГ (опционально)
+        document.getElementById('balance').innerText = balance;
 
         function generateTape() {
             tape.innerHTML = '';
-            for (let i = 0; i < 80; i++) {
+            for (let i = 0; i < 60; i++) {
                 const val = possiblePrizes[Math.floor(Math.random() * possiblePrizes.length)];
                 const div = document.createElement('div');
                 div.className = 'item';
-                div.style.borderBottomColor = val > 50 ? '#ffcc00' : '#333';
+                div.style.borderBottomColor = val >= 100 ? '#ffcc00' : '#333';
                 div.innerHTML = `<span>${val}</span><small>m¢</small>`;
                 tape.appendChild(div);
             }
         }
 
         function startSpin() {
-            if (isSpinning || balance < 100) return;
+            if (isSpinning || balance < 100) {
+                if (balance < 100) tg.showAlert("Недостаточно средств!");
+                return;
+            }
+            
             isSpinning = true;
             balance -= 100;
             updateUI();
 
-            // Эффект кейса
-            const box = document.getElementById('caseBox');
-            box.classList.add('opening');
-
-            // Подготовка ленты
+            document.getElementById('caseBox').classList.add('opening');
             generateTape();
             tape.style.transition = 'none';
             tape.style.transform = 'translateX(0)';
 
             setTimeout(() => {
                 tape.style.transition = 'transform 5s cubic-bezier(0.15, 0, 0.15, 1)';
-                // Случайная остановка (каждый слот 110px)
-                const spinDistance = (110 * 60) + Math.floor(Math.random() * 100);
+                const winIndex = 50; // Индекс выигрышного слота
+                const winValue = possiblePrizes[Math.floor(Math.random() * possiblePrizes.length)];
+                
+                // Подменяем 50-й элемент на наш реальный выигрыш
+                tape.children[winIndex].innerHTML = `<span>${winValue}</span><small>m¢</small>`;
+                
+                const spinDistance = (winIndex * 100) - (tape.parentElement.offsetWidth / 2) + 50;
                 tape.style.transform = `translateX(-${spinDistance}px)`;
 
                 setTimeout(() => {
-                    const win = possiblePrizes[Math.floor(Math.random() * possiblePrizes.length)];
-                    alert(`🥳 Победа! Выпало: ${win} m¢`);
-                    
-                    balance += win;
-                    isSpinning = false;
-                    box.classList.remove('opening');
-                    updateUI();
+                    finishGame(winValue);
                 }, 5200);
             }, 100);
+        }
+
+        function finishGame(win) {
+            balance += win;
+            updateUI();
+            
+            const popup = document.getElementById('result-popup');
+            const title = document.getElementById('result-title');
+            const text = document.getElementById('result-text');
+            
+            const profit = win - 100;
+            if (profit >= 0) {
+                title.innerText = "ВЫИГРЫШ!";
+                title.style.color = "var(--win)";
+                text.innerText = `+${win} m¢`;
+            } else {
+                title.innerText = "ПРОИГРЫШ";
+                title.style.color = "var(--lose)";
+                text.innerText = `${win} m¢`;
+            }
+
+            popup.style.display = 'block';
+
+            // Отправляем данные в Telegram Бота через 2 секунды
+            setTimeout(() => {
+                const data = {
+                    action: 'case_result',
+                    win: win,
+                    cost: 100
+                };
+                tg.sendData(JSON.stringify(data)); 
+            }, 2000);
         }
 
         function updateUI() {
