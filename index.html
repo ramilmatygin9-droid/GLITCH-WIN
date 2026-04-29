@@ -3,58 +3,57 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Case Roulette One-Line</title>
+    <title>Ultimate Case Opener</title>
     <style>
         :root {
-            --bg: #0d0e12;
-            --card: #1c1f26;
-            --accent: #ffb700;
-            --border: #2d323e;
-            --text: #ffffff;
+            --bg: #0b0c0f;
+            --card: #161920;
+            --accent: #ffcc00;
+            --win: #00ff88;
+            --border: #2a2e38;
         }
 
         body {
-            font-family: 'Inter', system-ui, sans-serif;
+            font-family: 'Segoe UI', sans-serif;
             background: var(--bg);
-            color: var(--text);
+            color: white;
             display: flex;
             flex-direction: column;
             align-items: center;
             margin: 0;
+            padding: 20px;
             overflow-x: hidden;
-            padding-top: 50px;
         }
 
         /* Баланс */
-        .balance-box {
-            font-size: 24px;
-            font-weight: 800;
-            margin-bottom: 40px;
-            padding: 10px 25px;
+        .balance-card {
             background: var(--card);
+            padding: 15px 30px;
             border-radius: 50px;
             border: 1px solid var(--border);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 40px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.4);
         }
-
-        .balance-box span { color: var(--accent); }
+        .balance-card span { color: var(--accent); }
 
         /* ЛЕНТОЧНАЯ РУЛЕТКА */
-        .roulette-container {
+        .roulette-wrapper {
             position: relative;
             width: 100%;
-            max-width: 600px;
-            height: 120px;
+            max-width: 500px;
+            height: 130px;
             background: var(--card);
             border: 2px solid var(--border);
+            border-radius: 15px;
             overflow: hidden;
-            border-radius: 12px;
-            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
         }
 
-        /* Центрирующая линия */
-        .roulette-container::before {
-            content: '';
+        /* Линия-указатель */
+        .pointer {
             position: absolute;
             left: 50%;
             top: 0;
@@ -68,175 +67,137 @@
 
         .tape {
             display: flex;
-            align-items: center;
             will-change: transform;
-            height: 100%;
+            transition: transform 5s cubic-bezier(0.15, 0, 0.15, 1);
         }
 
-        .slot {
+        .item {
             min-width: 100px;
             height: 100px;
             margin: 0 5px;
-            background: #252932;
-            border-radius: 8px;
+            background: #20242d;
+            border-radius: 10px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             font-weight: bold;
-            font-size: 18px;
-            border-bottom: 4px solid #3d4452;
+            border-bottom: 4px solid #333;
         }
 
-        .slot.rare { border-bottom-color: #ff3e3e; color: #ff3e3e; }
-        .slot.gold { border-bottom-color: var(--accent); color: var(--accent); }
-
-        /* Кнопка */
-        .btn-spin {
-            background: var(--accent);
-            color: #000;
-            border: none;
-            padding: 18px 60px;
-            font-size: 18px;
-            font-weight: bold;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: 0.3s;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .btn-spin:active { transform: scale(0.95); }
-        .btn-spin:disabled { background: #444; color: #888; }
-
-        /* АНИМАЦИЯ КЕЙСА */
-        .case-wrapper {
+        /* КЕЙС */
+        .case-area {
             margin-top: 50px;
-            position: relative;
-            cursor: pointer;
+            text-align: center;
         }
 
-        .case-visual {
-            width: 150px;
-            height: 100px;
-            background: linear-gradient(135deg, #3a4150, #1c1f26);
-            border: 2px solid var(--border);
-            border-radius: 10px;
+        .case-box {
+            width: 180px;
+            height: 120px;
+            background: linear-gradient(135deg, #2a2e38, #161920);
+            border: 2px solid var(--accent);
+            border-radius: 15px;
             display: flex;
             align-items: center;
             justify-content: center;
+            font-size: 20px;
             font-weight: bold;
+            cursor: pointer;
             transition: 0.3s;
+            position: relative;
         }
 
-        .case-visual.opening {
-            animation: explode 0.5s ease-out forwards;
-        }
+        .case-box:hover { transform: scale(1.05); box-shadow: 0 0 20px rgba(255,204,0,0.2); }
 
-        @keyframes explode {
+        /* Анимация открытия */
+        .opening { animation: openEffect 0.6s forwards; }
+
+        @keyframes openEffect {
             0% { transform: scale(1); filter: brightness(1); }
-            50% { transform: scale(1.2); filter: brightness(2); border-color: #fff; }
+            50% { transform: scale(1.2) rotate(5deg); filter: brightness(2); }
             100% { transform: scale(0); opacity: 0; }
         }
 
-        .win-popup {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) scale(0);
+        .btn-spin {
+            margin-top: 20px;
+            padding: 15px 40px;
             background: var(--accent);
-            color: #000;
-            padding: 30px 60px;
-            border-radius: 20px;
-            font-size: 32px;
-            font-weight: 900;
-            z-index: 100;
-            transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: none;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
         }
 
-        .win-popup.show { transform: translate(-50%, -50%) scale(1); }
+        .btn-spin:disabled { background: #444; cursor: not-allowed; }
 
     </style>
 </head>
 <body>
 
-    <div class="balance-box">💰 <span id="balance">1000</span> m¢</div>
+    <div class="balance-card">Баланс: <span id="balance">1000</span> m¢</div>
 
-    <div class="roulette-container">
+    <div class="roulette-wrapper">
+        <div class="pointer"></div>
         <div id="tape" class="tape"></div>
     </div>
 
-    <button id="spinBtn" class="btn-spin" onclick="startRoulette()">ОТКРЫТЬ КЕЙС (100 m¢)</button>
-
-    <div class="case-wrapper" id="caseRoot" onclick="startRoulette()">
-        <div class="case-visual" id="caseIcon">BOX</div>
+    <div class="case-area">
+        <div id="caseBox" class="case-box" onclick="startSpin()">КЕЙС (100 m¢)</div>
+        <button id="spinBtn" class="btn-spin" onclick="startSpin()">ОТКРЫТЬ</button>
     </div>
-
-    <div id="winPopup" class="win-popup">+100 m¢</div>
 
     <script>
         let balance = 1000;
         let isSpinning = false;
         const tape = document.getElementById('tape');
-        const items = [
-            {v: 10, t: 'common'}, {v: 20, t: 'common'}, {v: 50, t: 'rare'}, 
-            {v: 15, t: 'common'}, {v: 100, t: 'gold'}, {v: 30, t: 'rare'},
-            {v: 5, t: 'common'}, {v: 80, t: 'gold'}
-        ];
+        
+        // Набор предметов для ленты (валюта от 10 до 100)
+        const possiblePrizes = [10, 15, 20, 25, 30, 40, 50, 60, 70, 80, 90, 100];
 
-        // Создаем длинную ленту
-        function initTape() {
+        function generateTape() {
             tape.innerHTML = '';
-            for(let i = 0; i < 100; i++) {
-                const item = items[Math.floor(Math.random() * items.length)];
+            for (let i = 0; i < 80; i++) {
+                const val = possiblePrizes[Math.floor(Math.random() * possiblePrizes.length)];
                 const div = document.createElement('div');
-                div.className = `slot ${item.t}`;
-                div.innerHTML = `<span>${item.v}</span><small>m¢</small>`;
+                div.className = 'item';
+                div.style.borderBottomColor = val > 50 ? '#ffcc00' : '#333';
+                div.innerHTML = `<span>${val}</span><small>m¢</small>`;
                 tape.appendChild(div);
             }
         }
 
-        function startRoulette() {
+        function startSpin() {
             if (isSpinning || balance < 100) return;
             isSpinning = true;
             balance -= 100;
             updateUI();
 
-            // Анимация кейса
-            const caseIcon = document.getElementById('caseIcon');
-            caseIcon.classList.add('opening');
+            // Эффект кейса
+            const box = document.getElementById('caseBox');
+            box.classList.add('opening');
 
-            // Сброс ленты
+            // Подготовка ленты
+            generateTape();
             tape.style.transition = 'none';
             tape.style.transform = 'translateX(0)';
-            
+
             setTimeout(() => {
                 tape.style.transition = 'transform 5s cubic-bezier(0.15, 0, 0.15, 1)';
-                // Вычисляем случайную остановку (каждый слот 110px с отступами)
-                const stopAt = 110 * 70 + Math.floor(Math.random() * 80); 
-                tape.style.transform = `translateX(-${stopAt}px)`;
+                // Случайная остановка (каждый слот 110px)
+                const spinDistance = (110 * 60) + Math.floor(Math.random() * 100);
+                tape.style.transform = `translateX(-${spinDistance}px)`;
 
                 setTimeout(() => {
-                    // Определяем выигрыш
-                    const finalIndex = Math.floor((stopAt + 300) / 110);
-                    const winValue = items[Math.floor(Math.random() * items.length)].v; // Упрощенный расчет
+                    const win = possiblePrizes[Math.floor(Math.random() * possiblePrizes.length)];
+                    alert(`🥳 Победа! Выпало: ${win} m¢`);
                     
-                    showWin(winValue);
-                    balance += winValue;
-                    updateUI();
-                    
+                    balance += win;
                     isSpinning = false;
-                    caseIcon.classList.remove('opening');
-                    initTape(); // Пересобираем ленту
+                    box.classList.remove('opening');
+                    updateUI();
                 }, 5200);
             }, 100);
-        }
-
-        function showWin(val) {
-            const popup = document.getElementById('winPopup');
-            popup.innerText = `+${val} m¢`;
-            popup.classList.add('show');
-            setTimeout(() => popup.classList.remove('show'), 2000);
         }
 
         function updateUI() {
@@ -244,8 +205,7 @@
             document.getElementById('spinBtn').disabled = isSpinning;
         }
 
-        initTape();
+        generateTape();
     </script>
 </body>
-</html>
 </html>
