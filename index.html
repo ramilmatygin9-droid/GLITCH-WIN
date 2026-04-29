@@ -3,119 +3,235 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Case Clicker & Roulette</title>
+    <title>Premium Casino & Cases</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body { font-family: sans-serif; background: #121212; color: white; text-align: center; margin: 0; padding: 15px; }
-        .stats { background: #1e1e1e; padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #333; }
-        .balance { color: #00ff00; font-weight: bold; font-size: 1.4em; }
-        
-        /* Рулетка */
-        .roulette-wrapper { position: relative; width: 300px; margin: 20px auto; overflow: hidden; border: 2px solid #444; border-radius: 10px; height: 60px; background: #222; }
-        .roulette-line { position: absolute; left: 50%; top: 0; bottom: 0; width: 2px; background: red; z-index: 10; }
-        .tape { display: flex; transition: transform 4s cubic-bezier(0.1, 0, 0.1, 1); }
-        .item { min-width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; font-size: 1.5em; border-right: 1px solid #333; }
+        :root {
+            --primary: #ffcc00;
+            --bg: #0f0f0f;
+            --card: #1a1a1a;
+        }
 
-        /* Кейсы */
-        .case-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .case-card { background: #1e1e1e; padding: 15px; border-radius: 10px; border: 1px solid #ffaa00; cursor: pointer; }
-        .btn-spin { background: #ffaa00; border: none; padding: 10px 20px; border-radius: 5px; font-weight: bold; margin-top: 10px; cursor: pointer; }
+        body {
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--bg);
+            color: white;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Статистика */
+        .header {
+            width: 100%;
+            max-width: 400px;
+            display: flex;
+            justify-content: space-between;
+            background: var(--card);
+            padding: 15px;
+            border-radius: 15px;
+            border: 1px solid #333;
+            margin-bottom: 20px;
+        }
+
+        .balance-val { color: var(--primary); font-weight: bold; font-size: 1.2em; }
+
+        /* БАРАБАННАЯ РУЛЕТКА */
+        .wheel-container {
+            position: relative;
+            width: 260px;
+            height: 260px;
+            margin-bottom: 30px;
+        }
+
+        .wheel {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 5px solid #333;
+            position: relative;
+            overflow: hidden;
+            transition: transform 4s cubic-bezier(0.15, 0, 0.15, 1);
+            background: conic-gradient(
+                #222 0deg 45deg, #333 45deg 90deg,
+                #222 90deg 135deg, #333 135deg 180deg,
+                #222 180deg 225deg, #333 225deg 270deg,
+                #222 270deg 315deg, #333 315deg 360deg
+            );
+        }
+
+        .wheel-item {
+            position: absolute;
+            width: 50%;
+            height: 50%;
+            transform-origin: 100% 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        /* СТРЕЛКА */
+        .pointer {
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0; 
+            height: 0; 
+            border-left: 15px solid transparent;
+            border-right: 15px solid transparent;
+            border-top: 30px solid var(--primary);
+            z-index: 10;
+        }
+
+        /* КЕЙСЫ */
+        .case-section {
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .case-box {
+            background: var(--card);
+            border: 2px dashed #444;
+            border-radius: 20px;
+            padding: 30px;
+            cursor: pointer;
+            transition: 0.3s;
+            position: relative;
+        }
+
+        .case-box:hover { border-color: var(--primary); }
+
+        /* Анимация тряски кейса */
+        @keyframes shake {
+            0% { transform: rotate(0deg); }
+            25% { transform: rotate(5deg); }
+            50% { transform: rotate(-5deg); }
+            75% { transform: rotate(5deg); }
+            100% { transform: rotate(0deg); }
+        }
+
+        .shaking { animation: shake 0.2s infinite; }
+
+        .btn {
+            background: var(--primary);
+            color: black;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 10px;
+            font-weight: bold;
+            font-size: 1.1em;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        .btn:disabled { background: #555; cursor: not-allowed; }
     </style>
 </head>
 <body>
-    <div class="stats">
-        <div>💰 Баланс: <span id="balance" class="balance">1000</span> m¢</div>
-        <div style="margin-top:5px;">📦 Кейсов: <span id="case-count">0</span></div>
+
+    <div class="header">
+        <div>💰 <span id="balance" class="balance-val">1000</span> m¢</div>
+        <div>📦 <span id="cases" class="balance-val">0</span></div>
     </div>
 
-    <h3>🎡 Рулетка (50 m¢)</h3>
-    <div class="roulette-wrapper">
-        <div class="roulette-line"></div>
-        <div id="tape" class="tape"></div>
+    <div class="wheel-container">
+        <div class="pointer"></div>
+        <div id="wheel" class="wheel">
+            </div>
     </div>
-    <button class="btn-spin" onclick="spinRoulette()">КРУТИТЬ</button>
+    
+    <button id="spinBtn" class="btn" onclick="spinWheel()">КРУТИТЬ (100 m¢)</button>
 
-    <h3>📦 Магазин кейсов</h3>
-    <div class="case-grid">
-        <div class="case-card" onclick="buyCase(100)">
-            <div>Обычный кейс</div>
-            <div style="color:#ffaa00">100 m¢</div>
-        </div>
-        <div class="case-card" onclick="openCase()">
-            <div>Открыть свой</div>
-            <div style="color:#aaa">Бесплатно</div>
+    <h3 style="margin-top: 40px;">📦 ВАШ КЕЙС</h3>
+    <div class="case-section">
+        <div id="caseBox" class="case-box" onclick="openCase()">
+            <div id="caseText" style="font-size: 1.5em;">НЕТ КЕЙСОВ</div>
+            <div id="caseHint" style="font-size: 0.8em; color: #777; margin-top: 10px;">Выиграй в рулетке!</div>
         </div>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
         let balance = 1000;
-        let cases = 0;
-        const items = ["💰", "💰", "📦", "💰", "💎", "💰", "📦", "💰", "🔥"];
+        let caseCount = 0;
+        let isSpinning = false;
 
-        function initTape() {
-            const tape = document.getElementById('tape');
-            tape.innerHTML = "";
-            for(let i=0; i<50; i++) {
-                const div = document.createElement('div');
-                div.className = 'item';
-                div.innerText = items[Math.floor(Math.random()*items.length)];
-                tape.appendChild(div);
-            }
-        }
+        const prizes = [
+            { icon: "💰", val: 50 }, { icon: "📦", val: "CASE" },
+            { icon: "💰", val: 200 }, { icon: "💎", val: 500 },
+            { icon: "💰", val: 20 }, { icon: "📦", val: "CASE" },
+            { icon: "💰", val: 100 }, { icon: "💀", val: 0 }
+        ];
 
-        function spinRoulette() {
-            if (balance < 50) return alert("Мало денег!");
-            balance -= 50;
-            updateUI();
-
-            const tape = document.getElementById('tape');
-            tape.style.transition = "none";
-            tape.style.transform = "translateX(0)";
-            
-            setTimeout(() => {
-                tape.style.transition = "transform 4s cubic-bezier(0.1, 0, 0.1, 1)";
-                const move = 2000 + Math.random() * 500;
-                tape.style.transform = `translateX(-${move}px)`;
-                
-                setTimeout(() => {
-                    const winChance = Math.random();
-                    if (winChance > 0.8) {
-                        cases++;
-                        alert("Вы выиграли КЕЙС! 📦");
-                    } else {
-                        const winMoney = Math.floor(Math.random() * 150);
-                        balance += winMoney;
-                        alert(`Вы выиграли ${winMoney} m¢!`);
-                    }
-                    updateUI();
-                }, 4000);
-            }, 50);
-        }
-
-        function buyCase(price) {
-            if (balance >= price) {
-                balance -= price;
-                cases++;
-                updateUI();
-            }
-        }
-
-        function openCase() {
-            if (cases <= 0) return alert("Нет кейсов!");
-            cases--;
-            const win = Math.floor(Math.random() * 500);
-            balance += win;
-            alert(`Из кейса выпало: ${win} m¢!`);
-            updateUI();
-        }
+        // Инициализация колеса
+        const wheel = document.getElementById('wheel');
+        prizes.forEach((p, i) => {
+            const el = document.createElement('div');
+            el.className = 'wheel-item';
+            el.style.transform = `rotate(${i * 45}deg)`;
+            el.innerHTML = `<span style="transform: rotate(45deg)">${p.icon}</span>`;
+            wheel.appendChild(el);
+        });
 
         function updateUI() {
             document.getElementById('balance').innerText = balance;
-            document.getElementById('case-count').innerText = cases;
+            document.getElementById('cases').innerText = caseCount;
+            const box = document.getElementById('caseBox');
+            if(caseCount > 0) {
+                document.getElementById('caseText').innerText = "📦 ОТКРЫТЬ";
+                box.style.borderColor = "#ffcc00";
+            } else {
+                document.getElementById('caseText').innerText = "НЕТ КЕЙСОВ";
+                box.style.borderColor = "#444";
+            }
         }
 
-        initTape();
+        function spinWheel() {
+            if (isSpinning || balance < 100) return;
+            isSpinning = true;
+            balance -= 100;
+            updateUI();
+
+            const randomDeg = Math.floor(Math.random() * 360) + (360 * 5); // 5 полных оборотов
+            wheel.style.transform = `rotate(${randomDeg}deg)`;
+
+            setTimeout(() => {
+                isSpinning = false;
+                // Расчет приза
+                const actualDeg = randomDeg % 360;
+                const prizeIndex = Math.floor(((360 - actualDeg + 22.5) % 360) / 45);
+                const prize = prizes[prizeIndex];
+
+                if(prize.val === "CASE") {
+                    caseCount++;
+                    alert("Вам выпал КЕЙС! 📦");
+                } else {
+                    balance += prize.val;
+                    alert(`Выигрыш: ${prize.val} m¢`);
+                }
+                updateUI();
+            }, 4000);
+        }
+
+        function openCase() {
+            if(caseCount <= 0 || isSpinning) return;
+            
+            const box = document.getElementById('caseBox');
+            box.classList.add('shaking'); // Запуск анимации тряски
+            
+            setTimeout(() => {
+                box.classList.remove('shaking');
+                caseCount--;
+                const win = Math.floor(Math.random() * 1000);
+                balance += win;
+                alert(`ИЗ КЕЙСА ВЫПАЛО: ${win} m¢! 🔥`);
+                updateUI();
+            }, 1500);
+        }
     </script>
 </body>
 </html>
