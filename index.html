@@ -1,138 +1,51 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carrot Kombat Web</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body { font-family: 'Arial', sans-serif; background: #ffffff; color: #333; margin: 0; padding: 0; text-align: center; }
-        
-        /* Хедер с балансом */
-        .top-bar { padding: 20px; border-bottom: 1px solid #eee; font-size: 24px; font-weight: bold; color: #27ae60; }
-
-        /* Контейнер колеса */
-        .wheel-box { position: relative; width: 300px; height: 300px; margin: 40px auto; }
-        #wheel { width: 100%; height: 100%; border-radius: 50%; border: 5px solid #333; transition: transform 5s cubic-bezier(0.1, 0, 0.2, 1); background: conic-gradient(
-            #f1c40f 0deg 72deg, #9b59b6 72deg 144deg, #3498db 144deg 216deg, #e74c3c 216deg 288deg, #2ecc71 288deg 360deg
-        ); }
-        .arrow { position: absolute; top: -20px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 15px solid transparent; border-right: 15px solid transparent; border-top: 30px solid #333; z-index: 10; }
-
-        /* Меню кейсов */
-        .case-card { margin: 15px; padding: 20px; border: 2px solid #eee; border-radius: 15px; display: flex; justify-content: space-between; align-items: center; }
-        .case-info b { font-size: 18px; }
-        .open-btn { background: #333; color: white; border: none; padding: 10px 20px; border-radius: 10px; cursor: pointer; }
-
-        /* Навигация */
-        .nav { position: fixed; bottom: 0; width: 100%; display: flex; background: #fff; border-top: 1px solid #eee; }
-        .nav-item { flex: 1; padding: 15px; cursor: pointer; font-weight: bold; }
-        .nav-item.active { border-top: 3px solid #000; background: #f9f9f9; }
-
-        .hidden { display: none; }
+        body { font-family: sans-serif; background: #1a1a1a; color: white; text-align: center; }
+        .game-card { border: 2px solid #444; border-radius: 15px; padding: 20px; margin: 10px; }
+        button { background: #0088cc; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; }
+        #balance { font-weight: bold; color: #00ff00; }
     </style>
 </head>
 <body>
-
-<div class="top-bar" id="balance">5000 💰</div>
-
-<div id="roulette-page" class="hidden">
-    <div class="wheel-box">
-        <div class="arrow"></div>
-        <div id="wheel"></div>
+    <h1>🥕 Carrot Kombat Web</h1>
+    <div class="game-card">
+        <p>Ваш баланс: <span id="balance">Загрузка...</span> m¢</p>
+        <button onclick="playGame()">Испытать удачу (10 m¢)</button>
     </div>
-    <h2 id="win-text">Нажми "Крутить"</h2>
-    <button class="open-btn" id="spin-btn" onclick="spinWheel()">КРУТИТЬ ЗА 500</button>
-    <br><br>
-    <button onclick="goBack()" style="border:none; background:none; color: gray;">← Назад к кейсам</button>
-</div>
 
-<div id="cases-page">
-    <div class="case-card">
-        <div class="case-info">
-            <b>Валютный кейс</b><br>
-            <small>От 100 до 50 000 💰</small>
-        </div>
-        <button class="open-btn" onclick="openCaseMenu()">Открыть</button>
-    </div>
-</div>
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand(); // Расширить на весь экран
 
-<div id="inventory-page" class="hidden" style="padding: 20px;">
-    <h3>Ваш инвентарь пуст</h3>
-</div>
+        // Имитация получения данных (в реальном проекте тут будет Fetch к API)
+        let balance = 1000;
+        document.getElementById('balance').innerText = balance;
 
-<div class="nav">
-    <div class="nav-item active" onclick="switchTab('cases')">Кейсы</div>
-    <div class="nav-item" onclick="switchTab('inventory')">Инвентарь</div>
-</div>
-
-<script>
-    let tg = window.Telegram.WebApp;
-    let balance = 5000;
-    let currentRotation = 0;
-    let isSpinning = false;
-
-    const prizes = [
-        { name: "50 000 💰", color: "legendary", deg: 36 }, // 0-72
-        { name: "100 💰", color: "common", deg: 108 },     // 72-144
-        { name: "500 💰", color: "rare", deg: 180 },       // 144-216
-        { name: "5 000 💰", color: "epic", deg: 252 },     // 216-288
-        { name: "1 000 💰", color: "rare", deg: 324 }      // 288-360
-    ];
-
-    function switchTab(tab) {
-        document.getElementById('cases-page').classList.toggle('hidden', tab !== 'cases');
-        document.getElementById('inventory-page').classList.toggle('hidden', tab !== 'inventory');
-        document.getElementById('roulette-page').classList.add('hidden');
-        document.querySelectorAll('.nav-item').forEach(el => el.classList.toggle('active', el.innerText.toLowerCase() === (tab === 'cases' ? 'кейсы' : 'инвентарь')));
-    }
-
-    function openCaseMenu() {
-        document.getElementById('cases-page').classList.add('hidden');
-        document.getElementById('roulette-page').classList.remove('hidden');
-    }
-
-    function goBack() {
-        if (isSpinning) return;
-        switchTab('cases');
-    }
-
-    function spinWheel() {
-        if (isSpinning || balance < 500) return;
-
-        balance -= 500;
-        updateBalance();
-        isSpinning = true;
-        document.getElementById('spin-btn').disabled = true;
-
-        // Случайный приз
-        const prizeIndex = Math.floor(Math.random() * prizes.length);
-        const prize = prizes[prizeIndex];
-        
-        // Расчет вращения (не менее 5 полных оборотов + угол приза)
-        const extraDegrees = (360 * 5) + (360 - prize.deg);
-        currentRotation += extraDegrees;
-
-        const wheel = document.getElementById('wheel');
-        wheel.style.transform = `rotate(${currentRotation}deg)`;
-
-        setTimeout(() => {
-            isSpinning = false;
-            document.getElementById('spin-btn').disabled = false;
-            document.getElementById('win-text').innerText = "Выпало: " + prize.name;
-            
-            // Начисление (упрощенно)
-            let winVal = parseInt(prize.name.replace(/\s/g, ''));
-            balance += winVal;
-            updateBalance();
-            tg.HapticFeedback.notificationOccurred('success');
-        }, 5000);
-    }
-
-    function updateBalance() {
-        document.getElementById('balance').innerText = balance + " 💰";
-    }
-
-    tg.expand();
-</script>
-
+        function playGame() {
+            if (balance >= 10) {
+                balance -= 10;
+                const win = Math.random() > 0.5;
+                if (win) {
+                    const prize = 20;
+                    balance += prize;
+                    alert("Вы выиграли " + prize + " m¢!");
+                } else {
+                    alert("Проигрыш!");
+                }
+                document.getElementById('balance').innerText = balance;
+                
+                // Отправляем данные обратно в бот (если нужно закрыть WebApp)
+                // tg.sendData(JSON.stringify({new_balance: balance}));
+            } else {
+                alert("Недостаточно средств!");
+            }
+        }
+    </script>
 </body>
 </html>
