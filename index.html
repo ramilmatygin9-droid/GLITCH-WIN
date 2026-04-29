@@ -3,75 +3,119 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Carrot Kombat Web</title>
+    <title>Case Clicker & Roulette</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #1a1a1a; color: white; text-align: center; margin: 0; padding: 20px; }
-        .balance-card { background: #2a2a2a; border-radius: 15px; padding: 20px; margin-bottom: 20px; border: 1px solid #444; }
-        .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 20px; }
-        .btn { background: #3a3a3a; border: none; border-radius: 10px; padding: 15px; color: white; cursor: pointer; transition: 0.2s; font-size: 1.2em; }
-        .btn:active { transform: scale(0.95); background: #555; }
-        .play-btn { background: #0088cc; grid-column: span 3; font-weight: bold; margin-top: 10px; }
-        #status { margin-top: 20px; font-size: 0.9em; color: #aaa; }
-        .win { color: #00ff00; font-weight: bold; }
-        .lose { color: #ff4444; font-weight: bold; }
+        body { font-family: sans-serif; background: #121212; color: white; text-align: center; margin: 0; padding: 15px; }
+        .stats { background: #1e1e1e; padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #333; }
+        .balance { color: #00ff00; font-weight: bold; font-size: 1.4em; }
+        
+        /* Рулетка */
+        .roulette-wrapper { position: relative; width: 300px; margin: 20px auto; overflow: hidden; border: 2px solid #444; border-radius: 10px; height: 60px; background: #222; }
+        .roulette-line { position: absolute; left: 50%; top: 0; bottom: 0; width: 2px; background: red; z-index: 10; }
+        .tape { display: flex; transition: transform 4s cubic-bezier(0.1, 0, 0.1, 1); }
+        .item { min-width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; font-size: 1.5em; border-right: 1px solid #333; }
+
+        /* Кейсы */
+        .case-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .case-card { background: #1e1e1e; padding: 15px; border-radius: 10px; border: 1px solid #ffaa00; cursor: pointer; }
+        .btn-spin { background: #ffaa00; border: none; padding: 10px 20px; border-radius: 5px; font-weight: bold; margin-top: 10px; cursor: pointer; }
     </style>
 </head>
 <body>
-    <div class="balance-card">
-        <div>💰 Баланс: <span id="balance">1000</span> m¢</div>
-        <div style="font-size: 0.8em; color: #888; margin-top: 5px;">💸 Ставка: <span id="bet">10</span> m¢</div>
+    <div class="stats">
+        <div>💰 Баланс: <span id="balance" class="balance">1000</span> m¢</div>
+        <div style="margin-top:5px;">📦 Кейсов: <span id="case-count">0</span></div>
     </div>
 
-    <h3>🎮 Выбери игру</h3>
-    <div class="grid">
-        <button class="btn" onclick="play('slots')">🎰</button>
-        <button class="btn" onclick="play('dice')">🎲</button>
-        <button class="btn" onclick="play('bask')">🏀</button>
-        <button class="btn" onclick="play('foot')">⚽</button>
-        <button class="btn" onclick="play('dart')">🎯</button>
-        <button class="btn" onclick="play('bowl')"> bowling </button>
+    <h3>🎡 Рулетка (50 m¢)</h3>
+    <div class="roulette-wrapper">
+        <div class="roulette-line"></div>
+        <div id="tape" class="tape"></div>
     </div>
+    <button class="btn-spin" onclick="spinRoulette()">КРУТИТЬ</button>
 
-    <div id="status">Нажми на иконку, чтобы сыграть</div>
+    <h3>📦 Магазин кейсов</h3>
+    <div class="case-grid">
+        <div class="case-card" onclick="buyCase(100)">
+            <div>Обычный кейс</div>
+            <div style="color:#ffaa00">100 m¢</div>
+        </div>
+        <div class="case-card" onclick="openCase()">
+            <div>Открыть свой</div>
+            <div style="color:#aaa">Бесплатно</div>
+        </div>
+    </div>
 
     <script>
         const tg = window.Telegram.WebApp;
-        tg.expand();
-
         let balance = 1000;
-        let bet = 10;
+        let cases = 0;
+        const items = ["💰", "💰", "📦", "💰", "💎", "💰", "📦", "💰", "🔥"];
 
-        function play(game) {
-            if (balance < bet) {
-                alert("Недостаточно средств!");
-                return;
+        function initTape() {
+            const tape = document.getElementById('tape');
+            tape.innerHTML = "";
+            for(let i=0; i<50; i++) {
+                const div = document.createElement('div');
+                div.className = 'item';
+                div.innerText = items[Math.floor(Math.random()*items.length)];
+                tape.appendChild(div);
             }
-
-            balance -= bet;
-            document.getElementById('status').innerText = "Крутим...";
-            
-            // Имитация задержки как в боте
-            setTimeout(() => {
-                const win = Math.random() > 0.6; // Шанс 40%
-                let multiplier = 2;
-                
-                if (win) {
-                    let winAmount = bet * multiplier;
-                    balance += winAmount;
-                    document.getElementById('status').innerHTML = `<span class="win">✅ ПОБЕДА! +${winAmount} m¢</span>`;
-                } else {
-                    document.getElementById('status').innerHTML = `<span class="lose">❌ ПРОИГРЫШ! -${bet} m¢</span>`;
-                }
-                
-                document.getElementById('balance').innerText = balance;
-                
-                // Отправка данных боту при закрытии (опционально)
-                tg.MainButton.setText("ЗАКРЫТЬ ИГРУ").show().onClick(() => {
-                    tg.close();
-                });
-            }, 1000);
         }
+
+        function spinRoulette() {
+            if (balance < 50) return alert("Мало денег!");
+            balance -= 50;
+            updateUI();
+
+            const tape = document.getElementById('tape');
+            tape.style.transition = "none";
+            tape.style.transform = "translateX(0)";
+            
+            setTimeout(() => {
+                tape.style.transition = "transform 4s cubic-bezier(0.1, 0, 0.1, 1)";
+                const move = 2000 + Math.random() * 500;
+                tape.style.transform = `translateX(-${move}px)`;
+                
+                setTimeout(() => {
+                    const winChance = Math.random();
+                    if (winChance > 0.8) {
+                        cases++;
+                        alert("Вы выиграли КЕЙС! 📦");
+                    } else {
+                        const winMoney = Math.floor(Math.random() * 150);
+                        balance += winMoney;
+                        alert(`Вы выиграли ${winMoney} m¢!`);
+                    }
+                    updateUI();
+                }, 4000);
+            }, 50);
+        }
+
+        function buyCase(price) {
+            if (balance >= price) {
+                balance -= price;
+                cases++;
+                updateUI();
+            }
+        }
+
+        function openCase() {
+            if (cases <= 0) return alert("Нет кейсов!");
+            cases--;
+            const win = Math.floor(Math.random() * 500);
+            balance += win;
+            alert(`Из кейса выпало: ${win} m¢!`);
+            updateUI();
+        }
+
+        function updateUI() {
+            document.getElementById('balance').innerText = balance;
+            document.getElementById('case-count').innerText = cases;
+        }
+
+        initTape();
     </script>
 </body>
 </html>
