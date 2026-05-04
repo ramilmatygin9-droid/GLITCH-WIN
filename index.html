@@ -25,7 +25,7 @@
             margin: 0; padding: 0; width: 100vw; height: 100vh; overflow: hidden;
         }
 
-        /* --- СКАНЕР (ЭКРАН 0) --- */
+        /* --- СКАНЕР --- */
         #scanner-screen {
             position: fixed; inset: 0; background: #000; z-index: 1000;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -50,7 +50,6 @@
             display: none; flex-direction: column; box-sizing: border-box;
         }
 
-        /* ОСТАЛЬНЫЕ СТИЛИ (БЕЗ ИЗМЕНЕНИЙ) */
         #pay-screen { z-index: 10; opacity: 1; transition: opacity 0.4s ease; }
         .header { display: flex; justify-content: space-between; align-items: center; height: 44px; margin-bottom: 20px; }
         .close-btn { color: var(--accent-blue); text-decoration: none; font-size: 17px; }
@@ -85,16 +84,13 @@
 </head>
 <body>
 
-<!-- ЭКРАН СКАНЕРА -->
 <div id="scanner-screen">
     <div id="reader"></div>
     <div class="scanner-overlay"></div>
-    <div class="scanner-hint">Наведите камеру на QR-код</div>
+    <div class="scanner-hint">Наведите камеру на любой QR-код</div>
 </div>
 
 <div class="screen-container">
-    
-    <!-- ЭКРАН 1: ОПЛАТА -->
     <div id="pay-screen" class="screen">
         <div class="header">
             <a href="#" class="close-btn" onclick="location.reload()">Закрыть</a>
@@ -106,7 +102,7 @@
             <div class="balance" id="balance-val">0,00 ₽</div>
         </div>
         <div class="recipient-card">
-            <div class="bus-icon-circle"><img src="image_3.png" class="bus-icon-img"></div>
+            <div class="bus-icon-circle"><img src="IMG_5700.png" class="bus-icon-img"></div>
             <div class="recipient-info">КрасноярскАвтоТранс QR</div>
         </div>
         <div class="bottom-pay-area">
@@ -116,7 +112,6 @@
         </div>
     </div>
 
-    <!-- ЭКРАН ГАЛОЧКИ -->
     <div id="full-check-screen">
         <div id="smoke-container"></div>
         <div class="big-check-circle" id="big-check">
@@ -125,16 +120,15 @@
         <div style="font-size: 34px; font-weight: 700; margin-top: 20px;">−48 ₽</div>
     </div>
 
-    <!-- ЭКРАН УСПЕХА -->
     <div id="success-screen" class="screen">
         <div class="success-x-close" onclick="location.reload()"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1 1L13 13M1 13L13 1" stroke="#999" stroke-width="2.5" stroke-linecap="round"/></svg></div>
         <div class="success-scroll-area">
             <div class="t-bank-tag">Т-Банк</div>
             <div id="current-datetime" style="color: #fff; font-size: 18px; margin-bottom: 25px;"></div>
-            <div class="success-avatar"><img src="image_3.png" class="avatar-img-white"></div>
+            <div class="success-avatar"><img src="IMG_5700.png" class="avatar-img-white"></div>
             <div style="font-size: 20px; font-weight: 600; margin-bottom: 12px;">КрасноярскАвтоТранс QR</div>
             <div class="mcc-row">
-                <img src="image_3.png" class="mcc-icon">
+                <img src="IMG_5700.png" class="mcc-icon">
                 <span style="color: #a5a5a7; font-size: 15px;">Местный транспорт • МСС 4111</span>
             </div>
             <div class="final-sum">−48 ₽</div>
@@ -152,20 +146,16 @@
     const fullCheckScreen = document.getElementById('full-check-screen');
     const successScreen = document.getElementById('success-screen');
     const dateTimeEl = document.getElementById('current-datetime');
+    const smokeContainer = document.getElementById('smoke-container');
 
-    // Инициализация сканера
     const html5QrCode = new Html5Qrcode("reader");
-    const config = { fps: 10, qrbox: { width: 250, height: 250 } };
-
-    html5QrCode.start({ facingMode: "environment" }, config, (decodedText) => {
-        // Когда любой QR найден
+    html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, () => {
         html5QrCode.stop().then(() => {
             scannerScreen.style.display = 'none';
             payScreen.style.display = 'flex';
         });
     });
 
-    // Логика баланса и времени
     const startBalance = (Math.random() * (463.38 - 163.62) + 163.62);
     document.getElementById('balance-val').innerText = startBalance.toFixed(2).replace('.', ',') + ' ₽';
 
@@ -173,6 +163,20 @@
         const now = new Date();
         const months = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'];
         dateTimeEl.innerText = `${now.getDate()} ${months[now.getMonth()]} • ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+    }
+
+    function createSmoke() {
+        for (let i = 0; i < 15; i++) {
+            const p = document.createElement('div');
+            p.className = 'smoke-particle';
+            const size = Math.random() * 40 + 20;
+            p.style.width = size + 'px'; p.style.height = size + 'px';
+            p.style.setProperty('--tx', (Math.random()-0.5)*200 + 'px');
+            p.style.setProperty('--ty', (Math.random()-0.5)*200 + 'px');
+            p.style.animation = `smoke-float ${Math.random()*0.8+0.5}s forwards`;
+            smokeContainer.appendChild(p);
+            setTimeout(() => p.remove(), 1500);
+        }
     }
 
     document.getElementById('pay-btn').addEventListener('click', () => {
@@ -187,6 +191,7 @@
                 setTimeout(() => {
                     fullCheckScreen.style.opacity = '1';
                     document.getElementById('big-check').style.transform = 'scale(1)';
+                    createSmoke();
                     setTimeout(() => {
                         fullCheckScreen.style.display = 'none';
                         successScreen.style.display = 'block';
