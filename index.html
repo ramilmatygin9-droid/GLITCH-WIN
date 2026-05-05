@@ -59,7 +59,6 @@
             position: absolute; bottom: 0; left: 0; right: 0;
             display: flex; flex-direction: column; align-items: center; 
             padding-bottom: calc(30px + env(safe-area-inset-bottom));
-            background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
         }
         
         .controls-row { 
@@ -67,8 +66,6 @@
             padding: 0 20px; margin-bottom: 40px;
         }
         .circle-btn { width: 54px; height: 54px; background: rgba(255,255,255,0.15); border-radius: 50%; display: flex; justify-content: center; align-items: center; pointer-events: auto; font-size: 22px; }
-        .shutter-btn { width: 80px; height: 80px; border: 4px solid white; border-radius: 50%; padding: 4px; pointer-events: auto; }
-        .shutter-inner { width: 100%; height: 100%; background: white; border-radius: 50%; }
 
         .new-tag-pill {
             background: #1c1c1e; padding: 12px 20px; border-radius: 30px; 
@@ -76,7 +73,7 @@
         }
         .green-new { background: #00c853; color: black; font-size: 10px; font-weight: 800; padding: 2px 6px; border-radius: 4px; }
 
-        /* --- ЭКРАНЫ ОПЛАТЫ --- */
+        /* --- ЭКРАНЫ --- */
         .screen-container { width: 100%; height: 100%; position: relative; }
         .screen {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
@@ -128,7 +125,7 @@
         <div class="scanner-bottom">
             <div class="controls-row">
                 <div class="circle-btn">📎</div>
-                <div class="shutter-btn"><div class="shutter-inner"></div></div>
+                <div style="width: 80px;"></div> <!-- Пустое место вместо кнопки затвора -->
                 <div class="circle-btn">⚡</div>
             </div>
             <div class="new-tag-pill">
