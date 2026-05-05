@@ -96,9 +96,9 @@
         .acc-info { display: flex; align-items: center; gap: 12px; }
         .acc-icon-box { position: relative; width: 40px; height: 40px; }
         .acc-icon-main { width: 40px; height: 40px; background: var(--accent-blue); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 18px; color: #fff; }
-        .acc-icon-bank { position: absolute; bottom: -2px; right: -2px; width: 16px; height: 16px; border-radius: 4px; border: 1.5px solid #181818; background: #fff; overflow: hidden; display: flex; align-items: center; justify-content: center; }
-        .acc-icon-bank img { width: 100%; height: 100%; object-fit: cover; }
-        .acc-text-balances { font-size: 15px; color: var(--text-gray); margin-top: 2px; }
+        
+        /* УБРАН КВАДРАТИК */
+        .acc-icon-bank { display: none; }
 
         .fixed-bottom { position: fixed; bottom: 0; left: 0; right: 0; padding: 20px; background: linear-gradient(transparent, #0b0b0b 30%); z-index: 20; }
         .btn-done { background: var(--t-yellow); color: #000; border: none; border-radius: 16px; padding: 18px; width: 100%; font-size: 17px; font-weight: 600; }
@@ -205,7 +205,6 @@
                     document.getElementById('info-wrap').classList.add('active'); 
                 }, 150);
                 
-                // Переход к чеку сразу после завершения анимации
                 setTimeout(() => {
                     document.getElementById('check-overlay').style.display = 'none';
                     document.getElementById('success-screen').style.display = 'block';
