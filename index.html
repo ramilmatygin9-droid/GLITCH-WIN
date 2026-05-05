@@ -21,12 +21,12 @@
         .screen { position: absolute; inset: 0; padding: 16px 20px env(safe-area-inset-bottom); display: flex; flex-direction: column; transition: filter 0.4s ease; }
         .blur-active { filter: blur(10px); pointer-events: none; }
 
-        /* ХЕДЕР ЭКРАНА ОПЛАТЫ */
-        .header-pay { display: flex; justify-content: space-between; align-items: center; height: 44px; margin-bottom: 20px; }
+        /* ОБЩИЙ ХЕДЕР С ПЛАШКОЙ */
+        .top-status-bar { height: 44px; display: flex; justify-content: center; align-items: center; padding-top: 10px; margin-bottom: 10px; }
+        .t-label { background: var(--t-yellow); color: #000; padding: 4px 18px; border-radius: 20px; font-weight: 800; font-size: 13px; letter-spacing: 0.5px; }
+
+        .header-pay { display: flex; justify-content: space-between; align-items: center; height: 44px; margin-bottom: 15px; }
         .close-link { color: var(--accent-blue); text-decoration: none; font-size: 17px; }
-        .header-icons { display: flex; gap: 8px; }
-        .icon-box { width: 32px; height: 32px; border: 1px solid #333; border-radius: 4px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-        .icon-box img { width: 100%; height: 100%; object-fit: cover; }
 
         .account-card { background: var(--card-bg); border-radius: 20px; padding: 18px; margin-bottom: 12px; }
         .recipient-card { background: var(--transport-orange); border-radius: 20px; padding: 18px; display: flex; align-items: center; gap: 14px; margin-bottom: 20px; }
@@ -38,17 +38,14 @@
         #loading-overlay { position: fixed; inset: 0; display: none; justify-content: center; align-items: center; z-index: 50; }
         .spinner { width: 45px; height: 45px; border: 4px solid rgba(255, 221, 45, 0.2); border-top: 4px solid var(--t-yellow); border-radius: 50%; animation: spin 0.8s linear infinite; }
 
-        /* ЭКРАН АНИМАЦИИ ГАЛОЧКИ */
+        /* ГАЛОЧКА */
         #check-overlay { position: fixed; inset: 0; background: var(--bg-color); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 100; }
         .success-ring { width: 90px; height: 90px; background: var(--success-green); border-radius: 50%; display: flex; justify-content: center; align-items: center; transform: scale(0); opacity: 0; position: relative; z-index: 102; }
         .success-wave { position: absolute; top: 50%; left: 50%; width: 100px; height: 100px; margin-top: -50px; margin-left: -50px; background: var(--success-green); border-radius: 50%; opacity: 0; z-index: 101; filter: blur(20px); }
         .paid-text { font-size: 24px; font-weight: 600; margin-top: 25px; color: #fff; opacity: 0; transform: translateY(10px); z-index: 102; }
 
-        /* ЭКРАН УСПЕХА (ЧЕК) */
+        /* ЧЕК */
         #success-screen { display: none; overflow-y: auto; background: #0b0b0b; padding: 0; }
-        .top-status-bar { height: 44px; display: flex; justify-content: center; align-items: center; position: sticky; top: 0; background: #0b0b0b; z-index: 10; padding-top: 10px; }
-        .t-label { background: var(--t-yellow); color: #000; padding: 4px 14px; border-radius: 20px; font-weight: 800; font-size: 13px; letter-spacing: 0.5px; }
-        
         .receipt-content { padding: 10px 20px; display: flex; flex-direction: column; align-items: center; }
         .avatar-main { width: 100px; height: 100px; border-radius: 50%; background: var(--transport-orange); display: flex; justify-content: center; align-items: center; margin-bottom: 20px; overflow: hidden; }
         .mcc-badge { background: rgba(255,255,255,0.08); color: var(--text-gray); padding: 4px 12px; border-radius: 20px; font-size: 14px; margin-top: 8px; display: flex; align-items: center; gap: 6px; }
@@ -64,6 +61,13 @@
         .detail-row { display: flex; flex-direction: column; gap: 4px; margin-bottom: 16px; }
         .detail-label { color: var(--text-gray); font-size: 14px; }
         .detail-value { color: #fff; font-size: 16px; font-weight: 400; line-height: 1.3; }
+
+        /* БЛОК СЧЕТА */
+        .post-pay-card { background: #181818; border-radius: 24px; padding: 20px; width: 100%; margin-top: 10px; }
+        .post-pay-title { font-size: 20px; font-weight: 500; margin-bottom: 15px; }
+        .acc-info { display: flex; align-items: center; gap: 12px; }
+        .acc-icon { width: 40px; height: 40px; background: var(--accent-blue); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 18px; }
+        .acc-text-balances { font-size: 15px; color: var(--text-gray); margin-top: 2px; }
 
         .fixed-bottom { position: fixed; bottom: 0; left: 0; right: 0; padding: 20px; background: linear-gradient(transparent, #0b0b0b 30%); z-index: 20; }
         .btn-done { background: var(--t-yellow); color: #000; border: none; border-radius: 16px; padding: 18px; width: 100%; font-size: 17px; font-weight: 600; }
@@ -90,17 +94,20 @@
 <body>
 
 <div id="pay-screen" class="screen">
+    <!-- Заменил кубики на плашку -->
+    <div class="top-status-bar"><div class="t-label">Т-БАНК</div></div>
+    
     <div class="header-pay">
         <a href="#" class="close-link">Закрыть</a>
-        <div class="header-icons">
-            <div class="icon-box"><img src="https://acdn.tinkoff.ru/static/documents/7716f40e-749e-4c7b-944f-c0c3a216440f.svg"></div>
-            <div class="icon-box"><img src="https://upload.wikimedia.org/wikipedia/commons/e/e0/SBP_logo.svg"></div>
-        </div>
+        <div style="font-weight: 600; font-size: 17px;">Оплата</div>
+        <div style="width: 50px;"></div>
     </div>
+
     <div class="account-card">
         <div style="color: var(--text-gray); font-size: 14px;">с Мой счет</div>
-        <div style="font-size: 30px; font-weight: 700; margin-top: 4px;">567,21 ₽</div>
+        <div id="initial-balance-display" style="font-size: 30px; font-weight: 700; margin-top: 4px;">0,00 ₽</div>
     </div>
+
     <div class="recipient-card">
         <div class="bus-icon-circle"><img src="IMG_5710.jpeg" class="bus-img"></div>
         <div>
@@ -108,6 +115,7 @@
             <div style="font-size: 12px; opacity: 0.8;">Маршрут №31</div>
         </div>
     </div>
+
     <div style="padding: 0 5px;">
         <div style="font-size: 32px; font-weight: 700;">48 ₽</div>
         <div style="color: var(--text-gray); font-size: 13px; margin-top: 4px;">Комиссия не взимается</div>
@@ -138,7 +146,7 @@
             <div style="background: #2c2c2e; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 20px;" onclick="location.reload()">×</div>
         </div>
 
-        <div class="fade-in-item delay-1" style="color: var(--text-gray); font-size: 15px; margin-bottom: 25px;" id="current-time-display">5 мая • 12:58</div>
+        <div class="fade-in-item delay-1" style="color: var(--text-gray); font-size: 15px; margin-bottom: 25px;" id="current-time-display">Загрузка...</div>
         
         <div class="avatar-main fade-in-item delay-1">
             <img src="IMG_5710.jpeg" style="width: 100%; height: 100%; object-fit: cover;">
@@ -169,6 +177,20 @@
                 <div class="detail-label">Получатель</div>
                 <div class="detail-value">АО «КПАТП №7»</div>
             </div>
+
+            <!-- СЧЕТ -->
+            <div class="post-pay-card">
+                <div class="post-pay-title">Перевод со счета[span_0](start_span)[span_0](end_span)[span_1](start_span)[span_1](end_span)</div>
+                <div class="acc-info">
+                    <div class="acc-icon">₽</div>
+                    <div>
+                        <div style="font-size: 17px; font-weight: 500;">Мой счет</div>
+                        <div class="acc-text-balances">
+                            <span id="final-start"></span> ₽ → <span id="final-end" style="color: #fff; font-weight: 600;"></span> ₽
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -184,12 +206,23 @@
     const checkOverlay = document.getElementById('check-overlay');
     const successScreen = document.getElementById('success-screen');
 
-    // Дата и время
-    const now = new Date();
-    const months = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'];
-    document.getElementById('current-time-display').innerText = `${now.getDate()} ${months[now.getMonth()]} • ${now.getHours()}:${now.getMinutes().toString().padStart(2, '0')}`;
+    // Рандом баланса[span_2](start_span)[span_2](end_span)
+    const minMoney = 102.63;
+    const maxMoney = 472.53;
+    const startBalance = (Math.random() * (maxMoney - minMoney) + minMoney).toFixed(2);
+    const endBalance = (startBalance - 48).toFixed(2);
+
+    document.getElementById('initial-balance-display').innerText = startBalance.replace('.', ',') + ' ₽';
+    document.getElementById('final-start').innerText = startBalance.replace('.', ',');
+    document.getElementById('final-end').innerText = endBalance.replace('.', ',');
 
     btn.addEventListener('click', () => {
+        // Фиксация времени при клике[span_3](start_span)[span_3](end_span)
+        const now = new Date();
+        const months = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'];
+        const timeStr = `${now.getDate()} ${months[now.getMonth()]} • ${now.getHours()}:${now.getMinutes().toString().padStart(2, '0')}`;
+        document.getElementById('current-time-display').innerText = timeStr;
+
         payScreen.classList.add('blur-active');
         loadingOverlay.style.display = 'flex';
 
