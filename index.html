@@ -16,34 +16,48 @@
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { background: var(--bg-color); color: #fff; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; margin: 0; overflow-x: hidden; }
+        body { background: var(--bg-color); color: #fff; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; margin: 0; overflow-x: hidden; height: 100vh; }
 
-        .screen { position: absolute; inset: 0; padding: 16px 20px env(safe-area-inset-bottom); display: flex; flex-direction: column; transition: filter 0.4s ease; }
+        /* ЭКРАН КАМЕРЫ */
+        #scanner-screen { position: fixed; inset: 0; display: flex; flex-direction: column; background: #000; z-index: 1000; }
+        .camera-header { display: flex; justify-content: space-between; align-items: center; padding: 60px 20px 20px; }
+        .camera-title { font-size: 19px; font-weight: 500; flex-grow: 1; text-align: center; margin-left: 30px; }
+        .close-x { font-size: 24px; font-weight: 300; }
+        .scan-area { flex-grow: 1; display: flex; justify-content: center; align-items: center; position: relative; }
+        .corners { width: 240px; height: 240px; border: 2px solid transparent; position: relative; }
+        .corners::before, .corners::after, .corner-btm::before, .corner-btm::after {
+            content: ''; position: absolute; width: 40px; height: 40px; border: 3px solid #fff;
+        }
+        .corners::before { top: 0; left: 0; border-right: 0; border-bottom: 0; border-radius: 12px 0 0 0; }
+        .corners::after { top: 0; right: 0; border-left: 0; border-bottom: 0; border-radius: 0 12px 0 0; }
+        .corner-btm::before { bottom: 0; left: 0; border-right: 0; border-top: 0; border-radius: 0 0 0 12px; }
+        .corner-btm::after { bottom: 0; right: 0; border-left: 0; border-top: 0; border-radius: 0 0 12px 0; }
+        .camera-controls { padding-bottom: 60px; display: flex; flex-direction: column; align-items: center; gap: 30px; }
+        .shutter-row { display: flex; align-items: center; gap: 40px; }
+        .side-btn { width: 50px; height: 50px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+        .shutter-btn { width: 80px; height: 80px; background: #fff; border-radius: 50%; border: 6px solid #000; box-shadow: 0 0 0 2px #fff; cursor: pointer; }
+        .scan-label { background: rgba(255,255,255,0.15); padding: 12px 20px; border-radius: 25px; display: flex; align-items: center; gap: 8px; font-size: 15px; }
+        .new-badge { background: #00c853; color: #000; font-size: 10px; font-weight: 800; padding: 2px 6px; border-radius: 4px; }
+
+        /* ЭКРАНЫ ОПЛАТЫ */
+        .screen { position: absolute; inset: 0; padding: 16px 20px env(safe-area-inset-bottom); display: flex; flex-direction: column; transition: filter 0.4s ease; background: var(--bg-color); }
         .blur-active { filter: blur(10px); pointer-events: none; }
-
         .top-status-bar { height: 44px; display: flex; justify-content: center; align-items: center; padding-top: 10px; margin-bottom: 10px; }
         .t-label { background: var(--t-yellow); color: #000; padding: 4px 18px; border-radius: 20px; font-weight: 800; font-size: 13px; letter-spacing: 0.5px; }
-
         .header-pay { display: flex; justify-content: space-between; align-items: center; height: 44px; margin-bottom: 15px; }
         .close-link { color: var(--accent-blue); text-decoration: none; font-size: 17px; }
-
         .account-card { background: var(--card-bg); border-radius: 20px; padding: 18px; margin-bottom: 12px; }
         .recipient-card { background: var(--transport-orange); border-radius: 20px; padding: 18px; display: flex; align-items: center; gap: 14px; margin-bottom: 20px; }
-        .bus-icon-circle { width: 46px; height: 46px; background: white; border-radius: 50%; display: flex; justify-content: center; align-items: center; overflow: hidden; flex-shrink: 0; }
+        .bus-icon-circle { width: 46px; height: 46px; background: #ff8c00; border-radius: 50%; display: flex; justify-content: center; align-items: center; overflow: hidden; flex-shrink: 0; }
         .bus-img { width: 100%; height: 100%; object-fit: cover; }
         .btn-pay-main { background: var(--t-yellow); color: #000; border: none; border-radius: 16px; padding: 18px; font-size: 16px; font-weight: 600; width: 100%; margin-top: auto; margin-bottom: 20px; }
 
-        /* ЗАГРУЗКА */
         #loading-overlay { position: fixed; inset: 0; display: none; justify-content: center; align-items: center; z-index: 50; }
         .spinner { width: 45px; height: 45px; border: 4px solid rgba(255, 221, 45, 0.2); border-top: 4px solid var(--t-yellow); border-radius: 50%; animation: spin 0.8s linear infinite; }
 
-        /* ЭФФЕКТ ОПЛАТЫ */
         #check-overlay { position: fixed; inset: 0; background: var(--bg-color); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 100; overflow: hidden; }
-        
         .wave-container { position: absolute; inset: 0; display: flex; justify-content: center; align-items: center; pointer-events: none; }
         .wave { position: absolute; border-radius: 50%; background: var(--success-green); opacity: 0; }
-        
-        /* Медленные плавные волны на весь экран */
         .wave-1 { width: 100px; height: 100px; animation: airWave 3.5s ease-out infinite; }
         .wave-2 { width: 100px; height: 100px; animation: airWave 3.5s ease-out 1.2s infinite; }
         .wave-3 { width: 100px; height: 100px; animation: airWave 3.5s ease-out 2.4s infinite; }
@@ -54,33 +68,20 @@
             100% { transform: scale(15); opacity: 0; filter: blur(50px); }
         }
 
-        .success-ring { 
-            width: 90px; height: 90px; background: var(--success-green); border-radius: 50%; 
-            display: flex; justify-content: center; align-items: center; 
-            transform: scale(0); opacity: 0; z-index: 2;
-        }
-        .success-ring.active { 
-            animation: bounceIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; 
-        }
-
+        .success-ring { width: 90px; height: 90px; background: var(--success-green); border-radius: 50%; display: flex; justify-content: center; align-items: center; transform: scale(0); opacity: 0; z-index: 2; }
+        .success-ring.active { animation: bounceIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
         .paid-info-wrap { text-align: center; margin-top: 25px; display: flex; flex-direction: column; align-items: center; z-index: 2; }
         .paid-text-slide, .paid-amount-slide { opacity: 0; transform: translateY(40px); }
-        .paid-info-wrap.active .paid-text-slide { animation: slideUp 0.5s 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards; }
-        .paid-info-wrap.active .paid-amount-slide { animation: slideUp 0.5s 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards; }
+        .paid-info-wrap.active .paid-text-slide { animation: slideUp 0.5s 0.25s forwards; }
+        .paid-info-wrap.active .paid-amount-slide { animation: slideUp 0.5s 0.35s forwards; }
 
-        @keyframes bounceIn {
-            0% { transform: scale(0.3); opacity: 0; }
-            70% { transform: scale(1.1); opacity: 1; }
-            100% { transform: scale(1); opacity: 1; }
-        }
+        @keyframes bounceIn { 0% { transform: scale(0.3); opacity: 0; } 70% { transform: scale(1.1); opacity: 1; } 100% { transform: scale(1); opacity: 1; } }
         @keyframes slideUp { to { opacity: 1; transform: translateY(0); } }
 
-        /* ЧЕК */
         #success-screen { display: none; overflow-y: auto; background: #0b0b0b; padding: 0; }
         .receipt-content { padding: 10px 20px; display: flex; flex-direction: column; align-items: center; }
         .avatar-main { width: 100px; height: 100px; border-radius: 50%; background: var(--transport-orange); display: flex; justify-content: center; align-items: center; margin-bottom: 20px; overflow: hidden; }
         .mcc-badge { background: rgba(255,255,255,0.08); color: var(--text-gray); padding: 4px 12px; border-radius: 20px; font-size: 14px; margin-top: 8px; display: flex; align-items: center; gap: 6px; }
-        
         .ignore-btn { background: #1c243d; border-radius: 14px; padding: 12px 24px; display: flex; flex-direction: column; align-items: center; margin-top: 20px; border: none; }
         .ignore-btn div:first-child { color: var(--accent-blue); font-size: 22px; font-weight: 300; }
         .ignore-btn div:last-child { color: var(--accent-blue); font-size: 13px; margin-top: 2px; }
@@ -94,13 +95,7 @@
         .post-pay-card { background: #181818; border-radius: 24px; padding: 20px; width: 100%; margin-top: 10px; }
         .post-pay-title { font-size: 20px; font-weight: 500; margin-bottom: 15px; }
         .acc-info { display: flex; align-items: center; gap: 12px; }
-        .acc-icon-box { position: relative; width: 40px; height: 40px; }
-        
-        /* ИЗМЕНЕН ЦВЕТ НА ОРАНЖЕВЫЙ */
-        .acc-icon-main { width: 40px; height: 40px; background: var(--transport-orange); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 18px; color: #fff; }
-        
-        /* УБРАН КВАДРАТИК */
-        .acc-icon-bank { display: none; }
+        .acc-icon-main { width: 40px; height: 40px; background: var(--accent-blue); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 18px; color: #fff; }
 
         .fixed-bottom { position: fixed; bottom: 0; left: 0; right: 0; padding: 20px; background: linear-gradient(transparent, #0b0b0b 30%); z-index: 20; }
         .btn-done { background: var(--t-yellow); color: #000; border: none; border-radius: 16px; padding: 18px; width: 100%; font-size: 17px; font-weight: 600; }
@@ -113,9 +108,29 @@
 </head>
 <body>
 
-<div id="pay-screen" class="screen">
+<!-- ЭКРАН СКАНЕРА -->
+<div id="scanner-screen">
+    <div class="camera-header">
+        <div class="camera-title">Умная камера</div>
+        <div class="close-x" onclick="location.reload()">✕</div>
+    </div>
+    <div class="scan-area">
+        <div class="corners"><div class="corner-btm"></div></div>
+    </div>
+    <div class="camera-controls">
+        <div class="scan-label">Что сканирует камера <span class="new-badge">NEW</span></div>
+        <div class="shutter-row">
+            <div class="side-btn">📎</div>
+            <div class="shutter-btn" id="shutter-btn"></div>
+            <div class="side-btn">⚡</div>
+        </div>
+    </div>
+</div>
+
+<!-- ЭКРАН ОПЛАТЫ -->
+<div id="pay-screen" class="screen" style="display: none;">
     <div class="top-status-bar"><div class="t-label">Т-БАНК</div></div>
-    <div class="header-pay"><a href="#" class="close-link">Закрыть</a><div style="font-weight: 600; font-size: 17px;">Оплата</div><div style="width: 50px;"></div></div>
+    <div class="header-pay"><a href="#" class="close-link" onclick="location.reload()">Закрыть</a><div style="font-weight: 600; font-size: 17px;">Оплата</div><div style="width: 50px;"></div></div>
     <div class="account-card">
         <div style="color: var(--text-gray); font-size: 14px;">с Мой счет</div>
         <div id="initial-balance-display" style="font-size: 30px; font-weight: 700; margin-top: 4px;">0,00 ₽</div>
@@ -164,9 +179,7 @@
             <div class="post-pay-card">
                 <div class="post-pay-title">Счет оплаты</div>
                 <div class="acc-info">
-                    <div class="acc-icon-box">
-                        <div class="acc-icon-main">₽</div>
-                    </div>
+                    <div class="acc-icon-box"><div class="acc-icon-main">₽</div></div>
                     <div>
                         <div style="font-size: 17px; font-weight: 500;">Мой счет</div>
                         <div class="acc-text-balances"><span id="final-start"></span> ₽ → <span id="final-end" style="color: #fff; font-weight: 600;"></span> ₽</div>
@@ -179,7 +192,6 @@
 </div>
 
 <script>
-    const btn = document.getElementById('pay-btn');
     const startBalance = (Math.random() * (472.53 - 102.63) + 102.63).toFixed(2);
     const endBalance = (startBalance - 48).toFixed(2);
 
@@ -187,7 +199,20 @@
     document.getElementById('final-start').innerText = startBalance.replace('.', ',');
     document.getElementById('final-end').innerText = endBalance.replace('.', ',');
 
-    btn.addEventListener('click', () => {
+    function startPayFlow() {
+        if (document.getElementById('pay-screen').style.display === 'flex') return;
+        document.getElementById('scanner-screen').style.display = 'none';
+        document.getElementById('pay-screen').style.display = 'flex';
+    }
+
+    // 1. ПЕРЕХОД ПО НАЖАТИЮ НА КНОПКУ
+    document.getElementById('shutter-btn').addEventListener('click', startPayFlow);
+
+    // 2. ИМИТАЦИЯ «ПОДНЕС QR-КОД» (срабатывает через 3 секунды)
+    setTimeout(startPayFlow, 3000);
+
+    // ЛОГИКА ОПЛАТЫ (БЕЗ ИЗМЕНЕНИЙ)
+    document.getElementById('pay-btn').addEventListener('click', () => {
         const now = new Date();
         const months = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'];
         document.getElementById('current-time-display').innerText = `${now.getDate()} ${months[now.getMonth()]} • ${now.getHours()}:${now.getMinutes().toString().padStart(2, '0')}`;
@@ -202,10 +227,7 @@
             
             setTimeout(() => {
                 document.getElementById('ring').classList.add('active');
-                setTimeout(() => { 
-                    document.getElementById('info-wrap').classList.add('active'); 
-                }, 150);
-                
+                setTimeout(() => { document.getElementById('info-wrap').classList.add('active'); }, 150);
                 setTimeout(() => {
                     document.getElementById('check-overlay').style.display = 'none';
                     document.getElementById('success-screen').style.display = 'block';
