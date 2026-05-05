@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Т-Банк</title>
+    <!-- Подключаем библиотеку сканера -->
+    <script src="https://unpkg.com/html5-qrcode"></script>
     <style>
         :root {
             --bg-color: #0b0b0b;
@@ -29,6 +31,12 @@
         /* ПАНЕЛЬ НАСТРОЕК */
         #settings-panel { position: fixed; inset: 0; background: #1c1c1e; z-index: 2000; display: flex; flex-direction: column; padding: 40px 20px; }
         .settings-input { background: #2c2c2e; border: 1px solid #444; color: #fff; padding: 15px; border-radius: 12px; font-size: 16px; margin-bottom: 20px; outline: none; }
+
+        /* ЭКРАН СКАНЕРА */
+        #scanner-screen { position: fixed; inset: 0; background: #000; z-index: 1500; display: none; flex-direction: column; }
+        #reader { width: 100% !important; height: 100% !important; }
+        #reader video { object-fit: cover !important; }
+        .scanner-overlay { position: absolute; inset: 0; border: 2px solid var(--t-yellow); margin: 60px; border-radius: 20px; pointer-events: none; z-index: 1501; box-shadow: 0 0 0 1000px rgba(0,0,0,0.5); }
 
         /* ЭКРАНЫ */
         .screen { position: absolute; inset: 0; display: none; flex-direction: column; background: var(--bg-color); }
@@ -102,7 +110,16 @@
     <h2 style="margin-top:0">Настройки</h2>
     <label style="margin-bottom:8px; color:var(--text-gray)">Номер маршрута</label>
     <input type="text" id="input-bus-number" class="settings-input" placeholder="31">
-    <button class="btn-pay-main" onclick="initPayment()" style="margin-top:auto">ГОТОВО</button>
+    <button class="btn-pay-main" onclick="startScanner()" style="margin-top:auto">ГОТОВО (Скан QR)</button>
+</div>
+
+<!-- Экран сканера -->
+<div id="scanner-screen">
+    <div id="reader"></div>
+    <div class="scanner-overlay"></div>
+    <div style="position:absolute; bottom:40px; width:100%; text-align:center; z-index:1502; font-weight:600;">
+        Наведите на QR-код для оплаты
+    </div>
 </div>
 
 <!-- Экран оплаты -->
@@ -199,13 +216,35 @@
 
 <script>
     let busNum = "31";
+    let html5QrCode;
     const startVal = (Math.random() * (450 - 150) + 150);
     const startBalance = startVal.toFixed(2);
     const endBalance = (startVal - 48).toFixed(2);
 
-    function initPayment() {
+    function startScanner() {
         busNum = document.getElementById('input-bus-number').value || "31";
         document.getElementById('settings-panel').style.display = 'none';
+        document.getElementById('scanner-screen').style.display = 'flex';
+
+        html5QrCode = new Html5Qrcode("reader");
+        const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+
+        html5QrCode.start({ facingMode: "environment" }, config, (decodedText) => {
+            // Как только QR обнаружен
+            stopScanner();
+            initPayment();
+        });
+    }
+
+    function stopScanner() {
+        if (html5QrCode) {
+            html5QrCode.stop().then(() => {
+                document.getElementById('scanner-screen').style.display = 'none';
+            });
+        }
+    }
+
+    function initPayment() {
         document.getElementById('pay-screen').style.display = 'flex';
         document.getElementById('initial-balance-display').innerText = startBalance.replace('.', ',') + ' ₽';
         document.getElementById('bus-label-pay').innerText = `Маршрут №${busNum}`;
