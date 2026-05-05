@@ -4,276 +4,189 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Т-Банк Платёж</title>
-    <script src="https://unpkg.com/html5-qrcode"></script>
     <style>
         :root {
-            --bg-color: #000000;
+            --bg-color: #0b0b0b;
             --card-bg: #1c1c1e;
             --accent-blue: #4c94ff;
             --t-yellow: #ffdd2d;
             --success-green: #2c9a41;
-            --text-gray: #999999;
+            --text-gray: #929294;
             --transport-orange: #f59e4c;
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { background: var(--bg-color); color: #fff; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; margin: 0; overflow: hidden; }
 
-        body {
-            background-color: var(--bg-color);
-            color: #ffffff;
-            font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            margin: 0; padding: 0; 
-            width: 100vw; 
-            min-height: 100vh; 
-            overflow-x: hidden;
-            overflow-y: auto; /* Включил скролл обратно */
-        }
+        .screen { position: absolute; inset: 0; padding: 16px 20px env(safe-area-inset-bottom); display: flex; flex-direction: column; transition: filter 0.4s ease; }
+        .blur-active { filter: blur(10px); pointer-events: none; }
 
-        /* --- СКАНЕР --- */
-        #scanner-screen {
-            position: fixed; inset: 0; background: #000; z-index: 1000;
-            display: flex; flex-direction: column;
-        }
-        #reader { width: 100% !important; height: 100% !important; border: none !important; }
-        #reader video { object-fit: cover !important; }
-
-        .scanner-ui {
-            position: absolute; inset: 0; z-index: 1001; pointer-events: none;
-            display: flex; flex-direction: column;
-        }
-
-        .scanner-top { 
-            padding: calc(20px + env(safe-area-inset-top)) 25px 0;
-            display: flex; justify-content: center; position: relative; 
-        }
-        .scanner-top span { font-size: 18px; font-weight: 500; }
-        .scanner-close { position: absolute; right: 25px; font-size: 24px; pointer-events: auto; }
-
-        .scanner-frame {
-            position: absolute; top: 42%; left: 50%; transform: translate(-50%, -50%);
-            width: 260px; height: 260px;
-        }
-        .corner { position: absolute; width: 35px; height: 35px; border: 4px solid rgba(255,255,255,0.6); }
-        .tl { top: 0; left: 0; border-right: 0; border-bottom: 0; border-radius: 12px 0 0 0; }
-        .tr { top: 0; right: 0; border-left: 0; border-bottom: 0; border-radius: 0 12px 0 0; }
-        .bl { bottom: 0; left: 0; border-right: 0; border-top: 0; border-radius: 0 0 0 12px; }
-        .br { bottom: 0; right: 0; border-left: 0; border-top: 0; border-radius: 0 0 12px 0; }
-
-        .scanner-bottom { 
-            position: absolute; bottom: 0; left: 0; right: 0;
-            display: flex; flex-direction: column; align-items: center; 
-            padding-bottom: calc(40px + env(safe-area-inset-bottom));
-        }
-        
-        .controls-row { 
-            width: 100%; display: flex; justify-content: space-around; align-items: center; 
-            padding: 0 30px; margin-bottom: 35px;
-        }
-        .circle-btn { width: 56px; height: 56px; background: rgba(255,255,255,0.15); border-radius: 50%; display: flex; justify-content: center; align-items: center; pointer-events: auto; font-size: 24px; }
-
-        .new-tag-pill {
-            background: #1c1c1e; padding: 12px 24px; border-radius: 30px; 
-            display: flex; align-items: center; gap: 10px; pointer-events: auto;
-        }
-        .green-new { background: #00c853; color: black; font-size: 10px; font-weight: 800; padding: 2px 6px; border-radius: 4px; }
-
-        /* --- ЭКРАНЫ --- */
-        .screen-container { width: 100%; min-height: 100vh; position: relative; }
-        .screen {
-            position: absolute; top: 0; left: 0; width: 100%; min-height: 100vh;
-            padding: 16px 20px env(safe-area-inset-bottom);
-            display: none; flex-direction: column; box-sizing: border-box;
-        }
-
-        #pay-screen { z-index: 10; opacity: 1; transition: opacity 0.4s ease; }
-        .header { display: flex; justify-content: space-between; align-items: center; height: 44px; margin-bottom: 20px; }
-        .close-btn { color: var(--accent-blue); text-decoration: none; font-size: 17px; }
-        .sbp-logo { height: 20px; }
+        /* ЭКРАН ОПЛАТЫ */
+        .header-pay { display: flex; justify-content: space-between; align-items: center; height: 44px; margin-bottom: 20px; }
+        .close-link { color: var(--accent-blue); text-decoration: none; font-size: 17px; }
         .account-card { background: var(--card-bg); border-radius: 20px; padding: 18px; margin-bottom: 12px; }
-        .balance { font-size: 30px; font-weight: 700; margin-top: 4px; letter-spacing: -0.5px; }
         .recipient-card { background: var(--transport-orange); border-radius: 20px; padding: 18px; display: flex; align-items: center; gap: 14px; margin-bottom: 20px; }
-        .bus-icon-circle { width: 42px; height: 42px; background: white; border-radius: 50%; display: flex; justify-content: center; align-items: center; overflow: hidden; }
-        .bus-icon-img { width: 100%; height: 100%; object-fit: cover; }
-        .bottom-pay-area { margin-top: auto; padding-bottom: calc(20px + env(safe-area-inset-bottom)); }
-        .btn-yellow { background: var(--t-yellow); color: #000; border: none; border-radius: 16px; padding: 18px; font-size: 16px; font-weight: 600; width: 100%; }
+        .bus-icon-circle { width: 46px; height: 46px; background: white; border-radius: 50%; display: flex; justify-content: center; align-items: center; overflow: hidden; flex-shrink: 0; }
+        .bus-img { width: 100%; height: 100%; object-fit: cover; }
+        .btn-pay-main { background: var(--t-yellow); color: #000; border: none; border-radius: 16px; padding: 18px; font-size: 16px; font-weight: 600; width: 100%; margin-top: auto; margin-bottom: 20px; }
+
+        /* ЗАГРУЗКА */
+        #loading-overlay { position: fixed; inset: 0; display: none; justify-content: center; align-items: center; z-index: 50; }
+        .spinner { width: 45px; height: 45px; border: 4px solid rgba(255, 221, 45, 0.2); border-top: 4px solid var(--t-yellow); border-radius: 50%; animation: spin 0.8s linear infinite; }
+
+        /* ЭКРАН АНИМАЦИИ ГАЛОЧКИ */
+        #check-overlay { position: fixed; inset: 0; background: var(--bg-color); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 100; }
+        .success-ring { width: 90px; height: 90px; background: var(--success-green); border-radius: 50%; display: flex; justify-content: center; align-items: center; transform: scale(0); opacity: 0; position: relative; z-index: 102; }
+        .success-wave { position: absolute; top: 50%; left: 50%; width: 100px; height: 100px; margin-top: -50px; margin-left: -50px; background: var(--success-green); border-radius: 50%; opacity: 0; z-index: 101; filter: blur(20px); }
+        .paid-text { font-size: 24px; font-weight: 600; margin-top: 25px; color: #fff; opacity: 0; transform: translateY(10px); z-index: 102; }
+
+        /* ЭКРАН УСПЕХА (ЧЕК) */
+        #success-screen { display: none; overflow-y: auto; background: #0b0b0b; padding: 0; }
+        .top-status-bar { height: 44px; display: flex; justify-content: center; align-items: center; position: sticky; top: 0; background: #0b0b0b; z-index: 10; padding-top: 10px; }
+        .t-label { background: var(--t-yellow); color: #000; padding: 4px 14px; border-radius: 20px; font-weight: 800; font-size: 13px; letter-spacing: 0.5px; }
+        .receipt-content { padding: 10px 20px; display: flex; flex-direction: column; align-items: center; padding-bottom: 120px; }
         
-        #central-loader { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); display: none; z-index: 100; }
-        .spinner { width: 40px; height: 40px; border: 3px solid rgba(255, 221, 45, 0.1); border-top: 3px solid var(--t-yellow); border-radius: 50%; animation: spin 0.8s linear infinite; }
+        .avatar-main { width: 100px; height: 100px; border-radius: 50%; background: var(--transport-orange); display: flex; justify-content: center; align-items: center; margin-bottom: 20px; }
+        .mcc-badge { background: rgba(255,255,255,0.08); color: var(--text-gray); padding: 4px 12px; border-radius: 20px; font-size: 14px; margin-top: 8px; display: flex; align-items: center; gap: 5px; }
+        
+        .ignore-btn { background: #1c243d; border-radius: 14px; padding: 12px 24px; display: flex; flex-direction: column; align-items: center; margin-top: 20px; border: none; }
+        .ignore-btn div:first-child { color: var(--accent-blue); font-size: 22px; font-weight: 300; }
+        .ignore-btn div:last-child { color: var(--accent-blue); font-size: 13px; margin-top: 2px; }
+
+        .fixed-bottom { position: fixed; bottom: 0; left: 0; right: 0; padding: 20px; background: linear-gradient(transparent, #0b0b0b 30%); }
+        .btn-done { background: var(--t-yellow); color: #000; border: none; border-radius: 16px; padding: 18px; width: 100%; font-size: 17px; font-weight: 600; }
+
+        /* АНИМАЦИИ */
         @keyframes spin { 100% { transform: rotate(360deg); } }
-        
-        #full-check-screen { position: fixed; inset: 0; background: var(--bg-color); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 200; opacity: 0; }
-        .big-check-circle { width: 90px; height: 90px; background: var(--success-green); border-radius: 50%; display: flex; justify-content: center; align-items: center; transform: scale(0.5); transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        
-        #smoke-container { position: absolute; pointer-events: none; }
-        .smoke-particle { position: absolute; background: rgba(255, 255, 255, 0.2); border-radius: 50%; filter: blur(8px); opacity: 0; }
-        @keyframes smoke-float { 0% { transform: translate(0, 0) scale(1); opacity: 0.6; } 100% { transform: translate(var(--tx), var(--ty)) scale(2.5); opacity: 0; } }
-        
-        #success-screen { display: none; opacity: 0; z-index: 300; background: #111111; overflow-y: auto; }
-        .success-scroll-area { display: flex; flex-direction: column; align-items: center; padding: 60px 20px calc(100px + env(safe-area-inset-bottom)); }
-        .success-x-close { position: fixed; top: 60px; right: 20px; background: #2c2c2e; width: 32px; height: 32px; border-radius: 50%; display: flex; justify-content: center; align-items: center; z-index: 310; pointer-events: auto; }
-        .t-bank-tag { background: var(--t-yellow); color: #000; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 800; text-transform: uppercase; margin-bottom: 25px; }
-        .success-avatar { width: 100px; height: 100px; background: var(--transport-orange); border-radius: 50%; display: flex; justify-content: center; align-items: center; margin-bottom: 15px; overflow: hidden; }
-        .avatar-img-white { width: 60%; height: 60%; object-fit: contain; filter: brightness(0) invert(1); }
-        .mcc-row { display: flex; align-items: center; gap: 8px; background: #242426; padding: 8px 14px; border-radius: 14px; margin-bottom: 30px; }
-        .mcc-icon { width: 18px; height: 18px; filter: sepia(1) saturate(5) hue-rotate(340deg); }
-        .final-sum { font-size: 42px; font-weight: 700; margin-bottom: 30px; }
-        .fixed-bottom-button { width: 100%; padding: 20px 0; background: #111111; margin-top: 20px; }
+        @keyframes popIn { 100% { transform: scale(1); opacity: 1; } }
+        @keyframes draw { 100% { stroke-dashoffset: 0; } }
+        @keyframes fadeInUp { 100% { opacity: 1; transform: translateY(0); } }
+        @keyframes wave-expand { 0% { transform: scale(0.8); opacity: 0; } 15% { opacity: 0.5; } 100% { transform: scale(10); opacity: 0; } }
+
+        .ring-animate { animation: popIn 0.5s cubic-bezier(0.17, 0.89, 0.32, 1.49) forwards; }
+        .wave-animate { animation: wave-expand 1.4s 0.4s cubic-bezier(0.15, 0, 0.2, 1) forwards; }
+        .draw-check { animation: draw 0.4s 0.3s forwards ease-out; }
+        .show-paid-text { animation: fadeInUp 0.5s 0.7s forwards; }
+        .fade-in-item { opacity: 0; transform: translateY(15px); }
+        .animate-item { animation: fadeInUp 0.6s ease-out forwards; }
+        .delay-1 { animation-delay: 0.1s; }
+        .delay-2 { animation-delay: 0.2s; }
+        .delay-3 { animation-delay: 0.3s; }
+        .delay-4 { animation-delay: 0.4s; }
     </style>
 </head>
 <body>
 
-<div id="scanner-screen">
-    <div id="reader"></div>
-    <div class="scanner-ui">
-        <div class="scanner-top">
-            <span>Умная камера</span>
-            <div class="scanner-close" onclick="location.reload()">✕</div>
-        </div>
-        
-        <div class="scanner-frame">
-            <div class="corner tl"></div>
-            <div class="corner tr"></div>
-            <div class="corner bl"></div>
-            <div class="corner br"></div>
-        </div>
-
-        <div class="scanner-bottom">
-            <div class="controls-row">
-                <div class="circle-btn">📎</div>
-                <div style="width: 56px;"></div> 
-                <div class="circle-btn">⚡</div>
-            </div>
-            <div class="new-tag-pill">
-                <span style="font-size: 15px;">Что сканирует камера</span>
-                <div class="green-new">NEW</div>
-            </div>
+<div id="pay-screen" class="screen">
+    <div class="header-pay">
+        <a href="#" class="close-link">Закрыть</a>
+        <img src="https://upload.wikimedia.org/wikipedia/commons/e/e0/SBP_logo.svg" height="18">
+        <div style="width: 50px;"></div>
+    </div>
+    <div class="account-card">
+        <div style="color: var(--text-gray); font-size: 14px;">с Мой счет</div>
+        <div style="font-size: 30px; font-weight: 700; margin-top: 4px;">567,21 ₽</div>
+    </div>
+    <div class="recipient-card">
+        <div class="bus-icon-circle"><img src="IMG_5710.jpeg" class="bus-img"></div>
+        <div>
+            <div style="font-weight: 600;">АО «КПАТП №7»</div>
+            <div style="font-size: 12px; opacity: 0.8;">Маршрут №31</div>
         </div>
     </div>
+    <div style="padding: 0 5px;">
+        <div style="font-size: 32px; font-weight: 700;">48 ₽</div>
+        <div style="color: var(--text-gray); font-size: 13px; margin-top: 4px;">Комиссия не взимается</div>
+    </div>
+    <button class="btn-pay-main" id="pay-btn">Оплатить 48 ₽</button>
 </div>
 
-<div class="screen-container">
-    <div id="pay-screen" class="screen">
-        <div class="header">
-            <a href="#" class="close-btn" onclick="location.reload()">Закрыть</a>
-            <img src="https://upload.wikimedia.org/wikipedia/commons/e/e0/SBP_logo.svg" class="sbp-logo">
-            <div style="width: 50px;"></div>
-        </div>
-        <div class="account-card">
-            <div style="color: var(--text-gray); font-size: 14px;">с Мой счет</div>
-            <div class="balance" id="balance-val">0,00 ₽</div>
-        </div>
-        <div class="recipient-card">
-            <div class="bus-icon-circle"><img src="IMG_5700.png" class="bus-icon-img"></div>
-            <div class="recipient-info">КрасноярскАвтоТранс QR</div>
-        </div>
-        <div class="bottom-pay-area">
-            <div style="font-size: 32px; font-weight: 700; margin-bottom: 4px;">48 ₽</div>
-            <div style="color: var(--text-gray); font-size: 13px; margin-bottom: 20px;">Комиссия не взимается</div>
-            <button class="btn-yellow" id="pay-btn">Оплатить 48 ₽</button>
-        </div>
-    </div>
+<div id="loading-overlay">
+    <div class="spinner"></div>
+</div>
 
-    <div id="full-check-screen">
-        <div id="smoke-container"></div>
-        <div class="big-check-circle" id="big-check">
-            <svg width="44" height="34" viewBox="0 0 12 10" fill="none"><path d="M1 5L4.5 8.5L11 1" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </div>
-        <div style="font-size: 34px; font-weight: 700; margin-top: 20px;">−48 ₽</div>
+<div id="check-overlay">
+    <div class="success-wave" id="wave"></div>
+    <div class="success-ring" id="ring">
+        <svg width="40" height="30" viewBox="0 0 12 10" fill="none">
+            <path style="stroke-dasharray: 100; stroke-dashoffset: 100;" id="check-svg" d="M1 5L4.5 8.5L11 1" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
     </div>
+    <div class="paid-text" id="paid-label">Оплачено!</div>
+    <div id="paid-amount" class="paid-text" style="font-size: 34px; font-weight: 700; margin-top: 10px;">−48 ₽</div>
+</div>
 
-    <div id="success-screen" class="screen">
-        <div class="success-x-close" onclick="location.reload()"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1 1L13 13M1 13L13 1" stroke="#999" stroke-width="2.5" stroke-linecap="round"/></svg></div>
-        <div class="success-scroll-area">
-            <div class="t-bank-tag">Т-Банк</div>
-            <div id="current-datetime" style="color: #fff; font-size: 18px; margin-bottom: 25px;"></div>
-            <div class="success-avatar"><img src="IMG_5700.png" class="avatar-img-white"></div>
-            <div style="font-size: 20px; font-weight: 600; margin-bottom: 12px;">КрасноярскАвтоТранс QR</div>
-            <div class="mcc-row">
-                <img src="IMG_5700.png" class="mcc-icon">
-                <span style="color: #a5a5a7; font-size: 15px;">Местный транспорт • МСС 4111</span>
+<div id="success-screen" class="screen">
+    <div class="top-status-bar"><div class="t-label">Т-БАНК</div></div>
+    
+    <div class="receipt-content">
+        <div style="width: 100%; display: flex; justify-content: flex-end; margin-bottom: 5px;">
+            <div style="background: #2c2c2e; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 20px;" onclick="location.reload()">×</div>
+        </div>
+
+        <div class="fade-in-item delay-1" style="color: var(--text-gray); font-size: 15px; margin-bottom: 25px;" id="current-time-display">4 мая • 14:58</div>
+        
+        <div class="avatar-main fade-in-item delay-1">
+            <img src="https://img.icons8.com/ios-filled/100/ffffff/bus.png" style="width: 50px; height: 50px;">
+        </div>
+        
+        <div class="fade-in-item delay-2" style="text-align: center;">
+            <div style="font-size: 20px; font-weight: 600;">КрасноярскАвтоТранс QR</div>
+            <div class="mcc-badge">
+                <span>🚌</span> Местный транспорт • MCC 4111
             </div>
-            <div class="final-sum">−48 ₽</div>
-            <div class="fixed-bottom-button"><button class="btn-yellow" onclick="location.reload()">Готово</button></div>
         </div>
+
+        <div class="fade-in-item delay-3" style="font-size: 42px; font-weight: 700; margin: 25px 0;">−48 ₽</div>
+        
+        <button class="ignore-btn fade-in-item delay-3">
+            <div>∅</div>
+            <div>Не учитывать</div>
+        </button>
     </div>
 
-    <div id="central-loader"><div class="spinner"></div></div>
+    <div class="fixed-bottom fade-in-item delay-4">
+        <button class="btn-done" onclick="location.reload()">Готово</button>
+    </div>
 </div>
 
 <script>
-    const scannerScreen = document.getElementById('scanner-screen');
+    const btn = document.getElementById('pay-btn');
     const payScreen = document.getElementById('pay-screen');
-    const loader = document.getElementById('central-loader');
-    const fullCheckScreen = document.getElementById('full-check-screen');
+    const loadingOverlay = document.getElementById('loading-overlay');
+    const checkOverlay = document.getElementById('check-overlay');
     const successScreen = document.getElementById('success-screen');
-    const dateTimeEl = document.getElementById('current-datetime');
-    const smokeContainer = document.getElementById('smoke-container');
 
-    const html5QrCode = new Html5Qrcode("reader");
+    // Авто-дата
+    const now = new Date();
+    const months = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'];
+    document.getElementById('current-time-display').innerText = `${now.getDate()} ${months[now.getMonth()]} • ${now.getHours()}:${now.getMinutes().toString().padStart(2, '0')}`;
 
-    function startScanning() {
-        html5QrCode.start(
-            { facingMode: "environment" }, 
-            { fps: 20, qrbox: { width: 250, height: 250 } },
-            (decodedText) => {
-                html5QrCode.stop().then(() => {
-                    scannerScreen.style.display = 'none';
-                    payScreen.style.display = 'flex';
-                });
-            },
-            (errorMessage) => { }
-        ).catch((err) => {
-            console.error("Camera access denied", err);
-        });
-    }
+    btn.addEventListener('click', () => {
+        payScreen.classList.add('blur-active');
+        loadingOverlay.style.display = 'flex';
 
-    window.addEventListener('DOMContentLoaded', startScanning);
-
-    const startBalance = (Math.random() * (463.38 - 163.62) + 163.62);
-    document.getElementById('balance-val').innerText = startBalance.toFixed(2).replace('.', ',') + ' ₽';
-
-    function updateDateTime() {
-        const now = new Date();
-        const months = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'];
-        dateTimeEl.innerText = `${now.getDate()} ${months[now.getMonth()]} • ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
-    }
-
-    function createSmoke() {
-        for (let i = 0; i < 15; i++) {
-            const p = document.createElement('div');
-            p.className = 'smoke-particle';
-            const size = Math.random() * 40 + 20;
-            p.style.width = size + 'px'; p.style.height = size + 'px';
-            p.style.setProperty('--tx', (Math.random()-0.5)*200 + 'px');
-            p.style.setProperty('--ty', (Math.random()-0.5)*200 + 'px');
-            p.style.animation = `smoke-float ${Math.random()*0.8+0.5}s forwards`;
-            smokeContainer.appendChild(p);
-            setTimeout(() => p.remove(), 1500);
-        }
-    }
-
-    document.getElementById('pay-btn').addEventListener('click', () => {
-        updateDateTime();
-        loader.style.display = 'block';
         setTimeout(() => {
-            loader.style.display = 'none';
-            payScreen.style.opacity = '0';
+            loadingOverlay.style.display = 'none';
+            payScreen.style.display = 'none';
+            checkOverlay.style.display = 'flex';
+
             setTimeout(() => {
-                payScreen.style.display = 'none';
-                fullCheckScreen.style.display = 'flex';
+                document.getElementById('ring').classList.add('ring-animate');
+                document.getElementById('wave').classList.add('wave-animate');
+                document.getElementById('check-svg').classList.add('draw-check');
+                document.getElementById('paid-label').classList.add('show-paid-text');
+                document.getElementById('paid-amount').classList.add('show-paid-text');
+                
                 setTimeout(() => {
-                    fullCheckScreen.style.opacity = '1';
-                    document.getElementById('big-check').style.transform = 'scale(1)';
-                    createSmoke();
-                    setTimeout(() => {
-                        fullCheckScreen.style.display = 'none';
-                        successScreen.style.display = 'block';
-                        setTimeout(() => successScreen.style.opacity = '1', 50);
-                    }, 1500);
-                }, 50);
-            }, 400);
+                    checkOverlay.style.display = 'none';
+                    successScreen.style.display = 'block';
+                    successScreen.querySelectorAll('.fade-in-item').forEach(item => item.classList.add('animate-item'));
+                }, 2200);
+            }, 100);
         }, 1200);
     });
 </script>
+
 </body>
 </html>
