@@ -53,12 +53,12 @@
         #success-screen { overflow-y: auto; padding-bottom: 120px; }
         .receipt-content { display: flex; flex-direction: column; align-items: center; padding: 0 20px; }
         .avatar-main { width: 90px; height: 90px; border-radius: 50%; background: #ff9d33; display: flex; justify-content: center; align-items: center; margin-top: 20px; margin-bottom: 15px; overflow: hidden; }
-        .avatar-main img { width: 50%; height: 50%; object-fit: contain; }
+        .avatar-main img { width: 100%; height: 100%; object-fit: cover; }
 
-.transport-badge { background: #1c1c1e; padding: 6px 14px 6px 8px; border-radius: 20px; display: flex; align-items: center; gap: 8px; margin-top: 10px; }
-.mini-bus-circle { width: 26px; height: 26px; background: #ff9d33; border-radius: 50%; display: flex; justify-content: center; align-items: center; flex-shrink: 0; }
-.mini-bus-icon { width: 16px; height: 16px; object-fit: contain; }
-.badge-text { color: var(--text-gray); font-size: 14px; }
+        .transport-badge { background: #1c1c1e; padding: 6px 14px 6px 8px; border-radius: 20px; display: flex; align-items: center; gap: 8px; margin-top: 10px; }
+        .mini-bus-circle { width: 26px; height: 26px; background: #ff9d33; border-radius: 50%; display: flex; justify-content: center; align-items: center; flex-shrink: 0; overflow: hidden; }
+        .mini-bus-icon { width: 100%; height: 100%; object-fit: cover; }
+        .badge-text { color: var(--text-gray); font-size: 14px; }
 
         /* СЕКЦИЯ РЕКВИЗИТОВ */
         .details-section { width: 100%; margin-top: 30px; text-align: left; }
@@ -118,7 +118,7 @@
         <div id="initial-balance-display" style="font-size: 30px; font-weight: 700; margin-top: 4px;">0,00 ₽</div>
     </div>
     <div class="recipient-card">
-        <div class="bus-icon-circle"><img src="https://raw.githubusercontent.com/ramilmatygin9-droid/GLITCH-WIN/refs/heads/main/IMG_5710.jpeg" style="width:100%;height:100%;object-fit:cover"></div>
+        <div class="bus-icon-circle"><img src="IMG_5710.jpeg" style="width:100%;height:100%;object-fit:cover"></div>
         <div><div style="font-weight: 600;">АО «КПАТП №7»</div><div id="bus-label-pay" style="font-size: 12px; opacity: 0.8;">Маршрут №31</div></div>
     </div>
     <div style="padding: 0 5px;"><div style="font-size: 32px; font-weight: 700;">48 ₽</div><div style="color: var(--text-gray); font-size: 13px; margin-top: 4px;">Комиссия не взимается</div></div>
@@ -149,14 +149,14 @@
         <div class="fade-in-item" id="current-time-display" style="color: var(--text-gray); font-size: 14px; margin-top: 10px;"></div>
         
         <div class="avatar-main fade-in-item">
-            <img src="https://raw.githubusercontent.com/ramilmatygin9-droid/GLITCH-WIN/refs/heads/main/IMG_5710.jpeg">
+            <img src="IMG_5710.jpeg">
         </div>
         
         <div class="fade-in-item" style="text-align: center;">
             <div style="font-size: 19px; font-weight: 600;">КрасноярскАвтоТранс QR</div>
             <div style="display:flex; justify-content:center">
                 <div class="transport-badge">
-                    <div class="mini-bus-circle"><img src="https://raw.githubusercontent.com/ramilmatygin9-droid/GLITCH-WIN/refs/heads/main/IMG_5710.jpeg" class="mini-bus-icon"></div>
+                    <div class="mini-bus-circle"><img src="IMG_5710.jpeg" class="mini-bus-icon"></div>
                     <div class="badge-text">Местный транспорт • MCC 4111</div>
                 </div>
             </div>
