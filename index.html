@@ -2,242 +2,235 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Т-Банк Платёж</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>T-Bank Mockup</title>
     <style>
         :root {
-            --bg-color: #0b0b0b;
-            --card-bg: #1c1c1e;
-            --accent-blue: #4c94ff;
-            --t-yellow: #ffdd2d;
-            --success-green: #2c9a41;
-            --text-gray: #929294;
-            --transport-orange: #f59e4c;
+            --bg-black: #000;
+            --card-gray: #1c1c1e;
+            --text-gray: #8e8e93;
+            --accent-blue: #007aff;
         }
 
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { background: var(--bg-color); color: #fff; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; margin: 0; overflow-x: hidden; height: 100vh; }
-
-        /* ЭКРАН КАМЕРЫ */
-        #scanner-screen { position: fixed; inset: 0; display: flex; flex-direction: column; background: #000; z-index: 1000; }
-        .camera-header { display: flex; justify-content: space-between; align-items: center; padding: 60px 20px 20px; }
-        .camera-title { font-size: 19px; font-weight: 500; flex-grow: 1; text-align: center; margin-left: 30px; }
-        .close-x { font-size: 24px; font-weight: 300; }
-        .scan-area { flex-grow: 1; display: flex; justify-content: center; align-items: center; position: relative; }
-        .corners { width: 240px; height: 240px; border: 2px solid transparent; position: relative; }
-        .corners::before, .corners::after, .corner-btm::before, .corner-btm::after {
-            content: ''; position: absolute; width: 40px; height: 40px; border: 3px solid #fff;
-        }
-        .corners::before { top: 0; left: 0; border-right: 0; border-bottom: 0; border-radius: 12px 0 0 0; }
-        .corners::after { top: 0; right: 0; border-left: 0; border-bottom: 0; border-radius: 0 12px 0 0; }
-        .corner-btm::before { bottom: 0; left: 0; border-right: 0; border-top: 0; border-radius: 0 0 0 12px; }
-        .corner-btm::after { bottom: 0; right: 0; border-left: 0; border-top: 0; border-radius: 0 0 12px 0; }
-        .camera-controls { padding-bottom: 60px; display: flex; flex-direction: column; align-items: center; gap: 30px; }
-        .shutter-row { display: flex; align-items: center; gap: 40px; }
-        .side-btn { width: 50px; height: 50px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; }
-        .shutter-btn { width: 80px; height: 80px; background: #fff; border-radius: 50%; border: 6px solid #000; box-shadow: 0 0 0 2px #fff; cursor: pointer; }
-        .scan-label { background: rgba(255,255,255,0.15); padding: 12px 20px; border-radius: 25px; display: flex; align-items: center; gap: 8px; font-size: 15px; }
-        .new-badge { background: #00c853; color: #000; font-size: 10px; font-weight: 800; padding: 2px 6px; border-radius: 4px; }
-
-        /* ЭКРАНЫ ОПЛАТЫ */
-        .screen { position: absolute; inset: 0; padding: 16px 20px env(safe-area-inset-bottom); display: flex; flex-direction: column; transition: filter 0.4s ease; background: var(--bg-color); }
-        .blur-active { filter: blur(10px); pointer-events: none; }
-        .top-status-bar { height: 44px; display: flex; justify-content: center; align-items: center; padding-top: 10px; margin-bottom: 10px; }
-        .t-label { background: var(--t-yellow); color: #000; padding: 4px 18px; border-radius: 20px; font-weight: 800; font-size: 13px; letter-spacing: 0.5px; }
-        .header-pay { display: flex; justify-content: space-between; align-items: center; height: 44px; margin-bottom: 15px; }
-        .close-link { color: var(--accent-blue); text-decoration: none; font-size: 17px; }
-        .account-card { background: var(--card-bg); border-radius: 20px; padding: 18px; margin-bottom: 12px; }
-        .recipient-card { background: var(--transport-orange); border-radius: 20px; padding: 18px; display: flex; align-items: center; gap: 14px; margin-bottom: 20px; }
-        .bus-icon-circle { width: 46px; height: 46px; background: #ff8c00; border-radius: 50%; display: flex; justify-content: center; align-items: center; overflow: hidden; flex-shrink: 0; }
-        .bus-img { width: 100%; height: 100%; object-fit: cover; }
-        .btn-pay-main { background: var(--t-yellow); color: #000; border: none; border-radius: 16px; padding: 18px; font-size: 16px; font-weight: 600; width: 100%; margin-top: auto; margin-bottom: 20px; }
-
-        #loading-overlay { position: fixed; inset: 0; display: none; justify-content: center; align-items: center; z-index: 50; }
-        .spinner { width: 45px; height: 45px; border: 4px solid rgba(255, 221, 45, 0.2); border-top: 4px solid var(--t-yellow); border-radius: 50%; animation: spin 0.8s linear infinite; }
-
-        #check-overlay { position: fixed; inset: 0; background: var(--bg-color); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 100; overflow: hidden; }
-        .wave-container { position: absolute; inset: 0; display: flex; justify-content: center; align-items: center; pointer-events: none; }
-        .wave { position: absolute; border-radius: 50%; background: var(--success-green); opacity: 0; }
-        .wave-1 { width: 100px; height: 100px; animation: airWave 3.5s ease-out infinite; }
-        .wave-2 { width: 100px; height: 100px; animation: airWave 3.5s ease-out 1.2s infinite; }
-        .wave-3 { width: 100px; height: 100px; animation: airWave 3.5s ease-out 2.4s infinite; }
-
-        @keyframes airWave {
-            0% { transform: scale(0.4); opacity: 0; filter: blur(15px); }
-            15% { opacity: 0.25; }
-            100% { transform: scale(15); opacity: 0; filter: blur(50px); }
+        body {
+            margin: 0;
+            background: var(--bg-black);
+            font-family: -apple-system, sans-serif;
+            color: white;
+            overflow-x: hidden;
         }
 
-        .success-ring { width: 90px; height: 90px; background: var(--success-green); border-radius: 50%; display: flex; justify-content: center; align-items: center; transform: scale(0); opacity: 0; z-index: 2; }
-        .success-ring.active { animation: bounceIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
-        .paid-info-wrap { text-align: center; margin-top: 25px; display: flex; flex-direction: column; align-items: center; z-index: 2; }
-        .paid-text-slide, .paid-amount-slide { opacity: 0; transform: translateY(40px); }
-        .paid-info-wrap.active .paid-text-slide { animation: slideUp 0.5s 0.25s forwards; }
-        .paid-info-wrap.active .paid-amount-slide { animation: slideUp 0.5s 0.35s forwards; }
+        /* Главный экран на основе фото */
+        .main-screen {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            max-width: 430px;
+            margin: 0 auto;
+            /* Обрезаем верхнюю часть с батареей и временем через background-position */
+            background: url('photo_2026-05-05_15-06-07.jpg') no-repeat;
+            background-size: 100%;
+            background-position: center -45px; 
+        }
 
-        @keyframes bounceIn { 0% { transform: scale(0.3); opacity: 0; } 70% { transform: scale(1.1); opacity: 1; } 100% { transform: scale(1); opacity: 1; } }
-        @keyframes slideUp { to { opacity: 1; transform: translateY(0); } }
+        /* Прозрачные кнопки-триггеры */
+        .touch-zone {
+            position: absolute;
+            cursor: pointer;
+            background: rgba(255, 255, 255, 0); /* Прозрачные */
+        }
 
-        #success-screen { display: none; overflow-y: auto; background: #0b0b0b; padding: 0; }
-        .receipt-content { padding: 10px 20px; display: flex; flex-direction: column; align-items: center; }
-        .avatar-main { width: 100px; height: 100px; border-radius: 50%; background: var(--transport-orange); display: flex; justify-content: center; align-items: center; margin-bottom: 20px; overflow: hidden; }
-        .mcc-badge { background: rgba(255,255,255,0.08); color: var(--text-gray); padding: 4px 12px; border-radius: 20px; font-size: 14px; margin-top: 8px; display: flex; align-items: center; gap: 6px; }
-        .ignore-btn { background: #1c243d; border-radius: 14px; padding: 12px 24px; display: flex; flex-direction: column; align-items: center; margin-top: 20px; border: none; }
-        .ignore-btn div:first-child { color: var(--accent-blue); font-size: 22px; font-weight: 300; }
-        .ignore-btn div:last-child { color: var(--accent-blue); font-size: 13px; margin-top: 2px; }
+        .search-trigger { top: 125px; left: 5%; width: 90%; height: 45px; }
+        .account-trigger { top: 610px; left: 5%; width: 90%; height: 90px; }
+        .nav-payments { bottom: 0; left: 25%; width: 25%; height: 70px; }
 
-        .details-section { width: 100%; margin-top: 30px; padding: 0 5px; margin-bottom: 140px; }
-        .details-header { color: var(--text-gray); font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 15px; }
-        .detail-row { display: flex; flex-direction: column; gap: 4px; margin-bottom: 16px; }
-        .detail-label { color: var(--text-gray); font-size: 14px; }
-        .detail-value { color: #fff; font-size: 16px; font-weight: 400; line-height: 1.3; }
+        /* Полноэкранный поиск (как на видео) */
+        #searchScreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg-black);
+            z-index: 200;
+            display: none;
+            padding: 20px;
+            box-sizing: border-box;
+        }
 
-        .post-pay-card { background: #181818; border-radius: 24px; padding: 20px; width: 100%; margin-top: 10px; }
-        .post-pay-title { font-size: 20px; font-weight: 500; margin-bottom: 15px; }
-        .acc-info { display: flex; align-items: center; gap: 12px; }
-        .acc-icon-main { width: 40px; height: 40px; background: var(--accent-blue); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 18px; color: #fff; }
+        .search-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
 
-        .fixed-bottom { position: fixed; bottom: 0; left: 0; right: 0; padding: 20px; background: linear-gradient(transparent, #0b0b0b 30%); z-index: 20; }
-        .btn-done { background: var(--t-yellow); color: #000; border: none; border-radius: 16px; padding: 18px; width: 100%; font-size: 17px; font-weight: 600; }
+        .search-input-wrap {
+            flex-grow: 1;
+            background: #1c1c1e;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            padding: 10px;
+        }
 
-        @keyframes spin { 100% { transform: rotate(360deg); } }
-        .fade-in-item { opacity: 0; transform: translateY(15px); }
-        .animate-item { animation: fadeInUp 0.6s ease-out forwards; }
-        @keyframes fadeInUp { 100% { opacity: 1; transform: translateY(0); } }
+        #searchInput {
+            background: transparent;
+            border: none;
+            color: white;
+            width: 100%;
+            font-size: 17px;
+            outline: none;
+        }
+
+        .cancel-btn { color: var(--accent-blue); cursor: pointer; }
+
+        /* Результаты поиска */
+        .search-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px 0;
+            border-bottom: 1px solid #1c1c1e;
+        }
+        .icon-circle { width: 35px; height: 35px; background: #2c2c2e; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+
+        /* Плавное меню счета (Bottom Sheet) */
+        .bottom-sheet {
+            position: fixed;
+            bottom: -100%;
+            left: 0;
+            width: 100%;
+            height: 90vh;
+            background: #151517;
+            border-radius: 20px 20px 0 0;
+            transition: transform 0.4s cubic-bezier(0.32, 1, 0.23, 1);
+            z-index: 300;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .bottom-sheet.active { transform: translateY(-100%); }
+
+        .handle { width: 40px; height: 5px; background: #333; border-radius: 10px; margin: 0 auto 20px; }
+        
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            display: none;
+            z-index: 250;
+        }
+
+        .extra-section {
+            background: #1c1c1e;
+            border-radius: 15px;
+            margin-top: 20px;
+            padding: 15px;
+        }
+
+        .row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #2c2c2e; }
+        .row:last-child { border: none; }
+        .label { color: var(--text-gray); }
+
+        .qr-box {
+            background: white;
+            width: 140px;
+            height: 140px;
+            margin: 20px auto;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: black;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
 
-<!-- ЭКРАН СКАНЕРА -->
-<div id="scanner-screen">
-    <div class="camera-header">
-        <div class="camera-title">Умная камера</div>
-        <div class="close-x" onclick="location.reload()">✕</div>
+    <div class="main-screen">
+        <!-- Кнопки поверх картинки -->
+        <div class="touch-zone search-trigger" onclick="toggleSearch(true)"></div>
+        <div class="touch-zone account-trigger" onclick="toggleSheet(true)"></div>
     </div>
-    <div class="scan-area">
-        <div class="corners"><div class="corner-btm"></div></div>
-    </div>
-    <div class="camera-controls">
-        <div class="scan-label">Что сканирует камера <span class="new-badge">NEW</span></div>
-        <div class="shutter-row">
-            <div class="side-btn">📎</div>
-            <div class="shutter-btn" id="shutter-btn"></div>
-            <div class="side-btn">⚡</div>
+
+    <!-- ЭКРАН ПОИСКА -->
+    <div id="searchScreen">
+        <div class="search-header">
+            <div class="search-input-wrap">
+                <span style="margin-right: 8px;">🔍</span>
+                <input type="text" id="searchInput" placeholder="Поиск">
+            </div>
+            <div class="cancel-btn" onclick="toggleSearch(false)">Отменить</div>
         </div>
-    </div>
-</div>
-
-<!-- ЭКРАН ОПЛАТЫ -->
-<div id="pay-screen" class="screen" style="display: none;">
-    <div class="top-status-bar"><div class="t-label">Т-БАНК</div></div>
-    <div class="header-pay"><a href="#" class="close-link" onclick="location.reload()">Закрыть</a><div style="font-weight: 600; font-size: 17px;">Оплата</div><div style="width: 50px;"></div></div>
-    <div class="account-card">
-        <div style="color: var(--text-gray); font-size: 14px;">с Мой счет</div>
-        <div id="initial-balance-display" style="font-size: 30px; font-weight: 700; margin-top: 4px;">0,00 ₽</div>
-    </div>
-    <div class="recipient-card">
-        <div class="bus-icon-circle"><img src="IMG_5710.jpeg" class="bus-img"></div>
-        <div><div style="font-weight: 600;">АО «КПАТП №7»</div><div style="font-size: 12px; opacity: 0.8;">Маршрут №31</div></div>
-    </div>
-    <div style="padding: 0 5px;"><div style="font-size: 32px; font-weight: 700;">48 ₽</div><div style="color: var(--text-gray); font-size: 13px; margin-top: 4px;">Комиссия не взимается</div></div>
-    <button class="btn-pay-main" id="pay-btn">Оплатить 48 ₽</button>
-</div>
-
-<div id="loading-overlay"><div class="spinner"></div></div>
-
-<div id="check-overlay">
-    <div class="wave-container">
-        <div class="wave wave-1"></div>
-        <div class="wave wave-2"></div>
-        <div class="wave wave-3"></div>
-    </div>
-    <div class="success-ring" id="ring">
-        <svg width="42" height="32" viewBox="0 0 12 10" fill="none"><path d="M1 5L4.5 8.5L11 1" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-    </div>
-    <div class="paid-info-wrap" id="info-wrap">
-        <div class="paid-text-slide" style="font-size: 24px; font-weight: 600;">Оплачено!</div>
-        <div class="paid-amount-slide" style="font-size: 36px; font-weight: 700; margin-top: 8px;">−48 ₽</div>
-    </div>
-</div>
-
-<div id="success-screen" class="screen">
-    <div class="top-status-bar"><div class="t-label">Т-БАНК</div></div>
-    <div class="receipt-content">
-        <div style="width: 100%; display: flex; justify-content: flex-end; margin-bottom: 5px;"><div style="background: #2c2c2e; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 20px;" onclick="location.reload()">×</div></div>
-        <div class="fade-in-item" style="color: var(--text-gray); font-size: 15px; margin-bottom: 25px;" id="current-time-display"></div>
-        <div class="avatar-main fade-in-item"><img src="IMG_5710.jpeg" style="width: 100%; height: 100%; object-fit: cover;"></div>
-        <div class="fade-in-item" style="text-align: center;">
-            <div style="font-size: 20px; font-weight: 600;">КрасноярскАвтоТранс QR</div>
-            <div class="mcc-badge"><div style="width:18px;height:18px;background:#fff;border-radius:50%;overflow:hidden;"><img src="IMG_5710.jpeg" style="width:100%;height:100%;object-fit:cover;"></div><span>Местный транспорт • MCC 4111</span></div>
-        </div>
-        <div class="fade-in-item" style="font-size: 42px; font-weight: 700; margin: 25px 0;">−48 ₽</div>
-        <button class="ignore-btn fade-in-item"><div>∅</div><div>Не учитывать</div></button>
-        <div class="details-section fade-in-item">
-            <div class="details-header">Реквизиты</div>
-            <div class="detail-row"><div class="detail-label">Назначение платежа</div><div class="detail-value">Оплата проезда, маршрут №31, городской муниципальный / автобус</div></div>
-            <div class="detail-row"><div class="detail-label">Получатель</div><div class="detail-value">АО «КПАТП №7»</div></div>
-            <div class="post-pay-card">
-                <div class="post-pay-title">Счет оплаты</div>
-                <div class="acc-info">
-                    <div class="acc-icon-box"><div class="acc-icon-main">₽</div></div>
-                    <div>
-                        <div style="font-size: 17px; font-weight: 500;">Мой счет</div>
-                        <div class="acc-text-balances"><span id="final-start"></span> ₽ → <span id="final-end" style="color: #fff; font-weight: 600;"></span> ₽</div>
-                    </div>
-                </div>
+        
+        <div id="searchResults">
+            <div class="search-item">
+                <div class="icon-circle">🔥</div>
+                <div>Топливо</div>
+            </div>
+            <div class="search-item">
+                <div class="icon-circle">🎮</div>
+                <div>Игра «Квизи»</div>
+            </div>
+            <div class="search-item">
+                <div class="icon-circle">🔠</div>
+                <div>Игра «5 букв»</div>
             </div>
         </div>
     </div>
-    <div class="fixed-bottom fade-in-item"><button class="btn-done" onclick="location.reload()">Готово</button></div>
-</div>
 
-<script>
-    const startBalance = (Math.random() * (472.53 - 102.63) + 102.63).toFixed(2);
-    const endBalance = (startBalance - 48).toFixed(2);
+    <!-- МЕНЮ СЧЕТА -->
+    <div class="overlay" id="overlay" onclick="toggleSheet(false)"></div>
+    <div class="bottom-sheet" id="accountSheet">
+        <div class="handle"></div>
+        <h2>Мой счет</h2>
+        <div style="font-size: 32px; font-weight: bold; margin-bottom: 5px;">5,41 ₽</div>
+        <div style="color: var(--text-gray); margin-bottom: 25px;">+ 124 балла лояльности</div>
 
-    document.getElementById('initial-balance-display').innerText = startBalance.replace('.', ',') + ' ₽';
-    document.getElementById('final-start').innerText = startBalance.replace('.', ',');
-    document.getElementById('final-end').innerText = endBalance.replace('.', ',');
+        <div class="qr-box">QR CODE</div>
+        <p style="text-align: center; color: var(--text-gray); font-size: 14px;">Ссылка для пополнения</p>
 
-    function startPayFlow() {
-        if (document.getElementById('pay-screen').style.display === 'flex') return;
-        document.getElementById('scanner-screen').style.display = 'none';
-        document.getElementById('pay-screen').style.display = 'flex';
-    }
-
-    // 1. ПЕРЕХОД ПО НАЖАТИЮ НА КНОПКУ
-    document.getElementById('shutter-btn').addEventListener('click', startPayFlow);
-
-    // 2. ИМИТАЦИЯ «ПОДНЕС QR-КОД» (срабатывает через 3 секунды)
-    setTimeout(startPayFlow, 3000);
-
-    // ЛОГИКА ОПЛАТЫ (БЕЗ ИЗМЕНЕНИЙ)
-    document.getElementById('pay-btn').addEventListener('click', () => {
-        const now = new Date();
-        const months = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'];
-        document.getElementById('current-time-display').innerText = `${now.getDate()} ${months[now.getMonth()]} • ${now.getHours()}:${now.getMinutes().toString().padStart(2, '0')}`;
+        <div class="extra-section">
+            <h4 style="margin: 0 0 10px 0;">Дополнительно</h4>
+            <div class="row"><span class="label">Тариф</span><span>Black</span></div>
+            <div class="row"><span class="label">Лимит на переводы</span><span>150 000 ₽</span></div>
+            <div class="row"><span class="label">Снятие без комиссии</span><span>До 100 000 ₽</span></div>
+            <div class="row"><span class="label">Реквизиты</span><span style="color:var(--accent-blue)">Показать</span></div>
+        </div>
         
-        document.getElementById('pay-screen').classList.add('blur-active');
-        document.getElementById('loading-overlay').style.display = 'flex';
+        <button onclick="toggleSheet(false)" style="width:100%; background:#2c2c2e; border:none; color:white; padding:15px; border-radius:12px; margin-top:20px; font-weight:600;">Закрыть</button>
+    </div>
 
-        setTimeout(() => {
-            document.getElementById('loading-overlay').style.display = 'none';
-            document.getElementById('pay-screen').style.display = 'none';
-            document.getElementById('check-overlay').style.display = 'flex';
-            
-            setTimeout(() => {
-                document.getElementById('ring').classList.add('active');
-                setTimeout(() => { document.getElementById('info-wrap').classList.add('active'); }, 150);
-                setTimeout(() => {
-                    document.getElementById('check-overlay').style.display = 'none';
-                    document.getElementById('success-screen').style.display = 'block';
-                    document.querySelectorAll('.fade-in-item').forEach((it, i) => {
-                        setTimeout(() => it.classList.add('animate-item'), i * 80);
-                    });
-                }, 850);
-            }, 100);
-        }, 1200);
-    });
-</script>
+    <script>
+        function toggleSearch(show) {
+            document.getElementById('searchScreen').style.display = show ? 'block' : 'none';
+            if(show) document.getElementById('searchInput').focus();
+        }
+
+        function toggleSheet(show) {
+            const sheet = document.getElementById('accountSheet');
+            const overlay = document.getElementById('overlay');
+            if(show) {
+                sheet.classList.add('active');
+                overlay.style.display = 'block';
+            } else {
+                sheet.classList.remove('active');
+                overlay.style.display = 'none';
+            }
+        }
+
+        // Логика фильтрации в поиске
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            const val = e.target.value.toLowerCase();
+            document.querySelectorAll('.search-item').forEach(item => {
+                const text = item.innerText.toLowerCase();
+                item.style.display = text.includes(val) ? 'flex' : 'none';
+            });
+        });
+    </script>
 </body>
 </html>
