@@ -24,7 +24,10 @@
 
         /* ЭКРАН ОПЛАТЫ */
         .header-pay { display: flex; justify-content: space-between; align-items: center; height: 44px; margin-bottom: 20px; }
-        .close-link { color: var(--accent-blue); text-decoration: none; font-size: 17px; }
+        .close-link { color: var(--accent-blue); text-decoration: none; font-size: 17px; width: 80px; }
+        .t-logo-top { width: 32px; height: 32px; }
+        .sbp-logo-top { height: 18px; width: 80px; display: flex; justify-content: flex-end; }
+        
         .account-card { background: var(--card-bg); border-radius: 20px; padding: 18px; margin-bottom: 12px; }
         .recipient-card { background: var(--transport-orange); border-radius: 20px; padding: 18px; display: flex; align-items: center; gap: 14px; margin-bottom: 20px; }
         .bus-icon-circle { width: 46px; height: 46px; background: white; border-radius: 50%; display: flex; justify-content: center; align-items: center; overflow: hidden; flex-shrink: 0; }
@@ -91,8 +94,10 @@
 <div id="pay-screen" class="screen">
     <div class="header-pay">
         <a href="#" class="close-link">Закрыть</a>
-        <img src="https://upload.wikimedia.org/wikipedia/commons/e/e0/SBP_logo.svg" height="18">
-        <div style="width: 50px;"></div>
+        <img src="https://acdn.tinkoff.ru/static/documents/7716f40e-749e-4c7b-944f-c0c3a216440f.svg" class="t-logo-top" alt="T-Logo">
+        <div class="sbp-logo-top">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/e/e0/SBP_logo.svg" height="18">
+        </div>
     </div>
     <div class="account-card">
         <div style="color: var(--text-gray); font-size: 14px;">с Мой счет</div>
