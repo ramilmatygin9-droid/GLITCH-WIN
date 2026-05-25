@@ -1,59 +1,60 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <title>Наш Мессенджер</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Messenger</title>
     <style>
-        #chat { height: 300px; border: 2px solid #333; overflow-y: scroll; padding: 10px; margin-bottom: 10px; }
-        input { padding: 5px; }
+        body { font-family: sans-serif; display: flex; flex-direction: column; height: 100vh; margin: 0; background: #eee; }
+        #chat { flex: 1; overflow-y: auto; padding: 10px; display: flex; flex-direction: column; }
+        .msg { background: white; padding: 8px 12px; border-radius: 15px; margin: 5px; max-width: 80%; align-self: flex-start; box-shadow: 0 1px 2px #ccc; }
+        .input-area { display: flex; padding: 10px; background: white; }
+        input { flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 20px; outline: none; }
+        button { margin-left: 10px; padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 20px; }
     </style>
 </head>
 <body>
-    <h3>Мессенджер</h3>
-    <input type="text" id="name" placeholder="Ваше имя">
-    <div id="chat">Загрузка чата...</div>
+
+<div id="chat"></div>
+<div class="input-area">
+    <input type="text" id="name" placeholder="Имя" style="max-width: 80px;">
     <input type="text" id="msg" placeholder="Сообщение...">
-    <button onclick="sendMessage()">Отправить</button>
+    <button onclick="send()">></button>
+</div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
-        import { getDatabase, ref, push, onValue, query, limitToLast } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-database.js";
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
+    import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-database.js";
 
-        // ВСТАВЬТЕ СЮДА ВАШИ ДАННЫЕ ИЗ FIREBASE
-        const firebaseConfig = {
-            apiKey: "ВАШ_API_KEY",
-            authDomain: "ВАШ_ПРОЕКТ.firebaseapp.com",
-            databaseURL: "https://ВАШ_ПРОЕКТ.firebaseio.com",
-            projectId: "ВАШ_ПРОЕКТ",
-            storageBucket: "ВАШ_ПРОЕКТ.appspot.com",
-            messagingSenderId: "ВАШ_ID",
-            appId: "ВАШ_APP_ID"
-        };
+    // --- ВСТАВЬ СВОИ ДАННЫЕ СЮДА ---
+    const firebaseConfig = {
+        apiKey: "АПИ_КЛЮЧ",
+        databaseURL: "ССЫЛКА_НА_БАЗУ",
+        projectId: "ID_ПРОЕКТА"
+    };
+    // -------------------------------
 
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
-        const chatRef = ref(db, 'messages');
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const messagesRef = ref(db, 'chat');
 
-        // Отправка сообщения
-        window.sendMessage = () => {
-            const name = document.getElementById('name').value || 'Аноним';
-            const text = document.getElementById('msg').value;
-            if(text) {
-                push(chatRef, { name: name, text: text, time: Date.now() });
-                document.getElementById('msg').value = '';
-            }
-        };
+    window.send = () => {
+        const name = document.getElementById('name').value || 'Аноним';
+        const text = document.getElementById('msg').value;
+        if (text) {
+            push(messagesRef, { name, text });
+            document.getElementById('msg').value = '';
+        }
+    };
 
-        // ТУТ МАГИЯ: этот код постоянно следит за новыми сообщениями
-        onValue(query(chatRef, limitToLast(20)), (snapshot) => {
-            const chatBox = document.getElementById('chat');
-            chatBox.innerHTML = ''; // Очищаем экран
-            snapshot.forEach((child) => {
-                const data = child.val();
-                chatBox.innerHTML += `<div><b>${data.name}:</b> ${data.text}</div>`;
-            });
-            chatBox.scrollTop = chatBox.scrollHeight; // Прокрутка вниз
+    onValue(messagesRef, (snapshot) => {
+        const chat = document.getElementById('chat');
+        chat.innerHTML = '';
+        snapshot.forEach((s) => {
+            const data = s.val();
+            chat.innerHTML += `<div class="msg"><b>${data.name}:</b> ${data.text}</div>`;
         });
-    </script>
+        chat.scrollTop = chat.scrollHeight;
+    });
+</script>
 </body>
 </html>
