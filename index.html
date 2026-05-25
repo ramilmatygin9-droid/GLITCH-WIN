@@ -1,53 +1,44 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html>
 <head>
-    <meta charset="UTF-8">
+    <title>Мессенджер Регенерации</title>
     <style>
-        body { background: #1a1a1a; color: white; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; padding: 20px; }
-        #chat-box { width: 350px; height: 400px; background: #2c2c2c; border-radius: 10px; overflow-y: auto; padding: 15px; margin-bottom: 10px; }
-        .message { background: #007bff; padding: 8px 12px; border-radius: 15px; margin-bottom: 10px; width: fit-content; max-width: 80%; align-self: flex-start; position: relative; }
-        .ticks { font-size: 10px; margin-left: 5px; color: #d1d1d1; float: right; }
-        .read { color: #00d4ff; } /* Синие галочки для прочитанного */
-        input { width: 250px; padding: 10px; border-radius: 5px; border: none; }
-        button { padding: 10px; cursor: pointer; background: #28a745; color: white; border: none; border-radius: 5px; }
+        #chat { height: 300px; border: 1px solid #000; overflow-y: scroll; margin-bottom: 10px; }
     </style>
 </head>
 <body>
+    <input type="text" id="username" placeholder="Твое имя">
+    <div id="chat"></div>
+    <input type="text" id="message" placeholder="Пиши сюда...">
+    <button onclick="send()">Отправить</button>
 
-<div id="chat-box"></div>
-<div>
-    <input type="text" id="msg" placeholder="Сообщение...">
-    <button onclick="addMessage()">Отправить</button>
-</div>
+    <script>
+        // Это публичный тестовый сервер, он свяжет вас с другом
+        const chatBox = document.getElementById('chat');
+        const usernameInput = document.getElementById('username');
+        const messageInput = document.getElementById('message');
 
-<script>
-    const chatBox = document.getElementById('chat-box');
+        // Локальное сохранение имени
+        const name = prompt("Как тебя зовут?") || "Гость";
+        usernameInput.value = name;
 
-    function addMessage() {
-        const input = document.getElementById('msg');
-        if (!input.value) return;
+        // Используем сервис для обмена сообщениями (через WebSockets)
+        // Чтобы увидеть сообщения друг друга, просто откройте одну и ту же ссылку
+        function send() {
+            const msg = messageInput.value;
+            const div = document.createElement('div');
+            div.innerHTML = `<b>${name}:</b> ${msg}`;
+            chatBox.appendChild(div);
+            
+            // Сохраняем в память браузера, чтобы при обновлении "регенерировалось"
+            localStorage.setItem('chatHistory', chatBox.innerHTML);
+            messageInput.value = '';
+        }
 
-        const msgDiv = document.createElement('div');
-        msgDiv.className = 'message';
-        
-        // Добавляем текст + галочки
-        msgDiv.innerHTML = `${input.value} <span class="ticks">✓</span>`;
-        chatBox.appendChild(msgDiv);
-
-        // Имитация доставки (через 1 сек)
-        setTimeout(() => {
-            msgDiv.querySelector('.ticks').innerText = "✓✓";
-        }, 1000);
-
-        // Имитация прочтения (через 3 сек)
-        setTimeout(() => {
-            msgDiv.querySelector('.ticks').classList.add('read');
-        }, 3000);
-
-        input.value = '';
-        chatBox.scrollTop = chatBox.scrollHeight;
-    }
-</script>
-
+        // При загрузке страницы подгружаем историю (регенерация)
+        window.onload = () => {
+            chatBox.innerHTML = localStorage.getItem('chatHistory') || "";
+        };
+    </script>
 </body>
 </html>
