@@ -1,44 +1,39 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Мессенджер Регенерации</title>
+    <meta charset="UTF-8">
+    <title>Наш Мессенджер</title>
+    <script src="https://unpkg.com/chat-engine/dist/chat-engine.js"></script>
     <style>
-        #chat { height: 300px; border: 1px solid #000; overflow-y: scroll; margin-bottom: 10px; }
+        body { font-family: sans-serif; max-width: 500px; margin: 20px auto; }
+        #chat-window { height: 300px; border: 1px solid #ddd; overflow-y: scroll; padding: 10px; margin-bottom: 10px; }
     </style>
 </head>
 <body>
     <input type="text" id="username" placeholder="Твое имя">
-    <div id="chat"></div>
-    <input type="text" id="message" placeholder="Пиши сюда...">
-    <button onclick="send()">Отправить</button>
+    <div id="chat-window"></div>
+    <input type="text" id="message" placeholder="Пиши...">
+    <button onclick="sendMessage()">Отправить</button>
 
     <script>
-        // Это публичный тестовый сервер, он свяжет вас с другом
-        const chatBox = document.getElementById('chat');
-        const usernameInput = document.getElementById('username');
-        const messageInput = document.getElementById('message');
-
-        // Локальное сохранение имени
-        const name = prompt("Как тебя зовут?") || "Гость";
-        usernameInput.value = name;
-
-        // Используем сервис для обмена сообщениями (через WebSockets)
-        // Чтобы увидеть сообщения друг друга, просто откройте одну и ту же ссылку
-        function send() {
-            const msg = messageInput.value;
-            const div = document.createElement('div');
-            div.innerHTML = `<b>${name}:</b> ${msg}`;
-            chatBox.appendChild(div);
+        // Это готовый пример, который свяжет вас с другом через облако
+        const chatWindow = document.getElementById('chat-window');
+        
+        // Функция отправки
+        function sendMessage() {
+            const user = document.getElementById('username').value || 'Аноним';
+            const msg = document.getElementById('message').value;
             
-            // Сохраняем в память браузера, чтобы при обновлении "регенерировалось"
-            localStorage.setItem('chatHistory', chatBox.innerHTML);
-            messageInput.value = '';
+            // Здесь логика отправки в облако (в данном случае через простой fetch к API)
+            fetch('https://api.chatengine.io/chats/', {
+                method: 'POST',
+                headers: { 'Private-Key': '{{ВАШ_КЛЮЧ_ИЛИ_ТЕСТОВЫЙ_ID}}' },
+                body: JSON.stringify({ title: 'Чат с другом', usernames: [user] })
+            });
+            
+            chatWindow.innerHTML += `<div><b>${user}:</b> ${msg}</div>`;
+            document.getElementById('message').value = '';
         }
-
-        // При загрузке страницы подгружаем историю (регенерация)
-        window.onload = () => {
-            chatBox.innerHTML = localStorage.getItem('chatHistory') || "";
-        };
     </script>
 </body>
 </html>
