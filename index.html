@@ -3,37 +3,57 @@
 <head>
     <meta charset="UTF-8">
     <title>Наш Мессенджер</title>
-    <script src="https://unpkg.com/chat-engine/dist/chat-engine.js"></script>
     <style>
-        body { font-family: sans-serif; max-width: 500px; margin: 20px auto; }
-        #chat-window { height: 300px; border: 1px solid #ddd; overflow-y: scroll; padding: 10px; margin-bottom: 10px; }
+        #chat { height: 300px; border: 2px solid #333; overflow-y: scroll; padding: 10px; margin-bottom: 10px; }
+        input { padding: 5px; }
     </style>
 </head>
 <body>
-    <input type="text" id="username" placeholder="Твое имя">
-    <div id="chat-window"></div>
-    <input type="text" id="message" placeholder="Пиши...">
+    <h3>Мессенджер</h3>
+    <input type="text" id="name" placeholder="Ваше имя">
+    <div id="chat">Загрузка чата...</div>
+    <input type="text" id="msg" placeholder="Сообщение...">
     <button onclick="sendMessage()">Отправить</button>
 
-    <script>
-        // Это готовый пример, который свяжет вас с другом через облако
-        const chatWindow = document.getElementById('chat-window');
-        
-        // Функция отправки
-        function sendMessage() {
-            const user = document.getElementById('username').value || 'Аноним';
-            const msg = document.getElementById('message').value;
-            
-            // Здесь логика отправки в облако (в данном случае через простой fetch к API)
-            fetch('https://api.chatengine.io/chats/', {
-                method: 'POST',
-                headers: { 'Private-Key': '{{ВАШ_КЛЮЧ_ИЛИ_ТЕСТОВЫЙ_ID}}' },
-                body: JSON.stringify({ title: 'Чат с другом', usernames: [user] })
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
+        import { getDatabase, ref, push, onValue, query, limitToLast } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-database.js";
+
+        // ВСТАВЬТЕ СЮДА ВАШИ ДАННЫЕ ИЗ FIREBASE
+        const firebaseConfig = {
+            apiKey: "ВАШ_API_KEY",
+            authDomain: "ВАШ_ПРОЕКТ.firebaseapp.com",
+            databaseURL: "https://ВАШ_ПРОЕКТ.firebaseio.com",
+            projectId: "ВАШ_ПРОЕКТ",
+            storageBucket: "ВАШ_ПРОЕКТ.appspot.com",
+            messagingSenderId: "ВАШ_ID",
+            appId: "ВАШ_APP_ID"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const chatRef = ref(db, 'messages');
+
+        // Отправка сообщения
+        window.sendMessage = () => {
+            const name = document.getElementById('name').value || 'Аноним';
+            const text = document.getElementById('msg').value;
+            if(text) {
+                push(chatRef, { name: name, text: text, time: Date.now() });
+                document.getElementById('msg').value = '';
+            }
+        };
+
+        // ТУТ МАГИЯ: этот код постоянно следит за новыми сообщениями
+        onValue(query(chatRef, limitToLast(20)), (snapshot) => {
+            const chatBox = document.getElementById('chat');
+            chatBox.innerHTML = ''; // Очищаем экран
+            snapshot.forEach((child) => {
+                const data = child.val();
+                chatBox.innerHTML += `<div><b>${data.name}:</b> ${data.text}</div>`;
             });
-            
-            chatWindow.innerHTML += `<div><b>${user}:</b> ${msg}</div>`;
-            document.getElementById('message').value = '';
-        }
+            chatBox.scrollTop = chatBox.scrollHeight; // Прокрутка вниз
+        });
     </script>
 </body>
 </html>
