@@ -2,57 +2,45 @@
 <html lang="ru">
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Messenger</title>
+    <title>Chat</title>
     <style>
-        body { font-family: sans-serif; display: flex; flex-direction: column; height: 100vh; margin: 0; background: #eee; }
+        body { margin: 0; font-family: sans-serif; height: 100vh; display: flex; flex-direction: column; background: #f0f2f5; }
         #chat { flex: 1; overflow-y: auto; padding: 10px; display: flex; flex-direction: column; }
-        .msg { background: white; padding: 8px 12px; border-radius: 15px; margin: 5px; max-width: 80%; align-self: flex-start; box-shadow: 0 1px 2px #ccc; }
-        .input-area { display: flex; padding: 10px; background: white; }
-        input { flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 20px; outline: none; }
-        button { margin-left: 10px; padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 20px; }
+        .msg { background: white; padding: 10px; border-radius: 15px; margin: 5px; max-width: 85%; align-self: flex-start; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+        .input-area { padding: 10px; background: white; display: flex; gap: 5px; }
+        input { padding: 10px; border: 1px solid #ccc; border-radius: 20px; outline: none; }
+        #name { width: 80px; } #msg { flex: 1; }
+        button { padding: 10px 20px; background: #25d366; color: white; border: none; border-radius: 20px; }
     </style>
 </head>
 <body>
 
 <div id="chat"></div>
 <div class="input-area">
-    <input type="text" id="name" placeholder="Имя" style="max-width: 80px;">
+    <input type="text" id="name" placeholder="Имя">
     <input type="text" id="msg" placeholder="Сообщение...">
-    <button onclick="send()">></button>
+    <button onclick="send()">OK</button>
 </div>
 
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
-    import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-database.js";
-
-    // --- ВСТАВЬ СВОИ ДАННЫЕ СЮДА ---
-    const firebaseConfig = {
-        apiKey: "АПИ_КЛЮЧ",
-        databaseURL: "ССЫЛКА_НА_БАЗУ",
-        projectId: "ID_ПРОЕКТА"
-    };
-    // -------------------------------
-
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
-    const messagesRef = ref(db, 'chat');
-
-    window.send = () => {
-        const name = document.getElementById('name').value || 'Аноним';
+<script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+<script>
+    const socket = io("https://socket-chat-example.herokuapp.com/"); // Публичный сервер
+    const chat = document.getElementById('chat');
+    
+    function send() {
+        const name = document.getElementById('name').value || 'User';
         const text = document.getElementById('msg').value;
-        if (text) {
-            push(messagesRef, { name, text });
+        if(text) {
+            socket.emit('chat message', { name, text });
             document.getElementById('msg').value = '';
         }
-    };
+    }
 
-    onValue(messagesRef, (snapshot) => {
-        const chat = document.getElementById('chat');
-        chat.innerHTML = '';
-        snapshot.forEach((s) => {
-            const data = s.val();
-            chat.innerHTML += `<div class="msg"><b>${data.name}:</b> ${data.text}</div>`;
-        });
+    socket.on('chat message', (data) => {
+        const div = document.createElement('div');
+        div.className = 'msg';
+        div.innerHTML = `<b>${data.name}:</b> ${data.text}`;
+        chat.appendChild(div);
         chat.scrollTop = chat.scrollHeight;
     });
 </script>
