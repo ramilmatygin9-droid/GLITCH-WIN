@@ -1,48 +1,39 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html>
 <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chat</title>
+    <meta charset="UTF-8">
+    <title>Мой Мессенджер</title>
     <style>
-        body { margin: 0; font-family: sans-serif; height: 100vh; display: flex; flex-direction: column; background: #f0f2f5; }
-        #chat { flex: 1; overflow-y: auto; padding: 10px; display: flex; flex-direction: column; }
-        .msg { background: white; padding: 10px; border-radius: 15px; margin: 5px; max-width: 85%; align-self: flex-start; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
-        .input-area { padding: 10px; background: white; display: flex; gap: 5px; }
-        input { padding: 10px; border: 1px solid #ccc; border-radius: 20px; outline: none; }
-        #name { width: 80px; } #msg { flex: 1; }
-        button { padding: 10px 20px; background: #25d366; color: white; border: none; border-radius: 20px; }
+        body { font-family: 'Segoe UI', sans-serif; display: flex; flex-direction: column; align-items: center; background: #f0f2f5; }
+        #chat { width: 90%; max-width: 500px; height: 400px; background: white; border-radius: 10px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); overflow-y: scroll; margin-top: 20px; }
+        .controls { width: 90%; max-width: 540px; display: flex; gap: 10px; margin-top: 10px; }
+        input { flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 5px; }
+        button { padding: 10px 20px; background: #0084ff; color: white; border: none; border-radius: 5px; cursor: pointer; }
     </style>
 </head>
 <body>
 
-<div id="chat"></div>
-<div class="input-area">
-    <input type="text" id="name" placeholder="Имя">
-    <input type="text" id="msg" placeholder="Сообщение...">
-    <button onclick="send()">OK</button>
-</div>
+    <h2>Локальный чат</h2>
+    <div id="chat"></div>
+    <div class="controls">
+        <input id="name" placeholder="Ваше имя">
+        <input id="msg" placeholder="Сообщение...">
+        <button onclick="send()">Отправить</button>
+    </div>
 
-<script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
-<script>
-    const socket = io("https://socket-chat-example.herokuapp.com/"); // Публичный сервер
-    const chat = document.getElementById('chat');
-    
-    function send() {
-        const name = document.getElementById('name').value || 'User';
-        const text = document.getElementById('msg').value;
-        if(text) {
-            socket.emit('chat message', { name, text });
+    <script>
+        const chat = document.getElementById('chat');
+        function send() {
+            const name = document.getElementById('name').value || 'Аноним';
+            const msg = document.getElementById('msg').value;
+            if(!msg) return;
+            
+            const p = document.createElement('p');
+            p.innerHTML = `<strong>${name}:</strong> ${msg}`;
+            chat.appendChild(p);
             document.getElementById('msg').value = '';
+            chat.scrollTop = chat.scrollHeight;
         }
-    }
-
-    socket.on('chat message', (data) => {
-        const div = document.createElement('div');
-        div.className = 'msg';
-        div.innerHTML = `<b>${data.name}:</b> ${data.text}`;
-        chat.appendChild(div);
-        chat.scrollTop = chat.scrollHeight;
-    });
-</script>
+    </script>
 </body>
 </html>
